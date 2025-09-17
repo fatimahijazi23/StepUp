@@ -1,0 +1,99 @@
+﻿@page
+@model aspteamWeb.Pages.Company.ComanyDashboardModel
+@{
+    ViewData["Title"] = "Company Dashboard";
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - StepUp</title>
+
+    <!-- Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Animate.css -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
+
+    <style>
+        body {
+            background-color: #f7faff;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .navbar {
+            background-color: #0d6efd;
+        }
+
+            .navbar a {
+                color: #fff !important;
+                font-weight: 500;
+            }
+
+        .dashboard-header {
+            margin: 40px 0 20px;
+            text-align: center;
+            animation: fadeInDown 1s;
+        }
+
+        .search-box {
+            margin: 20px auto;
+            max-width: 700px;
+            animation: fadeIn 1.2s;
+        }
+
+        .job-card {
+            border-radius: 12px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+            transition: transform 0.2s ease-in-out;
+        }
+
+            .job-card:hover {
+                transform: translateY(-5px);
+            }
+
+        footer {
+            background: #0d6efd;
+            color: #fff;
+            padding: 15px;
+            margin-top: 40px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container">
+            <a class="navbar-brand fw-bold" href="#">StepUp</a>
+            <div class="collapse navbar-collapse">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item"><a class="nav-link" asp-page="/CompanyDashboard">Dashboard</a></li>
+                    <li class="nav-item"><a class="nav-link" asp-page="/Profile">Profile</a></li>
+                    <li class="nav-item"><a class="nav-link" asp-page="/History">History</a></li>
+                    <li class="nav-item"><a class="nav-link" asp-page="/Logout">Logout</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Dashboard Header -->
+    <div class="container">
+        <div class="dashboard-header animate__animated animate__fadeInDown">
+            <h1 class="fw-bold text-dark">Company Dashboard</h1>
+            <button class="btn btn-primary mt-3"><i class="bi bi-plus-circle"></i> Create New Job</button>
+        </div>
+
+        <!-- Search -->
+        <div class="search-box animate__animated animate__fadeIn">
+            <input type="text" class="form-control form-control-lg shadow-sm" placeholder="Search your job postings..." />
+        </div>
+
+     
+
+    <!-- Bootstrap + Icons -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+</body>
+</html>
