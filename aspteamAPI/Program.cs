@@ -5,6 +5,7 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using aspteamAPI.IRepository;
 using Microsoft.OpenApi.Models;
+using aspteamAPI;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -18,6 +19,9 @@ builder.Services.AddScoped<IAuthRepositories, AuthRepository>();
 // In Program.cs:
 builder.Services.AddScoped<IEmailService, MockEmailService>();
 builder.Services.AddScoped<IJobSeekerRepository, JobSeekerRepository>();
+builder.Services.AddScoped<IJobSeekerProfileRepo, JobSeekerProfileRepository>();
+builder.Services.AddScoped<ICompanyProfileRepository, CompanyProfileRepository>();
+builder.Services.AddScoped<ICvRepository, CvRepository>();
 
 // Add Controllers
 builder.Services.AddControllers();
