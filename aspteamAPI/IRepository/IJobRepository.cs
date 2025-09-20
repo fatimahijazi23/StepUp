@@ -2,18 +2,12 @@
 
 namespace aspteamAPI.Repositories
 {
-    public interface IJobRepository
+    public interface IJobRepository : IRepository<Job>
     {
-        Task<IEnumerable<JobListDto>> GetJobsAsync(
-            string? keyword,
-            Industry? industry,
-            ExperienceLevel? experienceLevel,
-            EmploymentType? employmentType,
-            WorkArrangement? workArrangement,
-            decimal? minSalary,
-            decimal? maxSalary,
-            string? location);
-
-        Task<JobDetailsDto?> GetJobDetailsAsync(int id);
+        Task<IEnumerable<Job>> SearchAsync(string keyword);
+        Task<IEnumerable<string>> GetCategoriesAsync();
+        Task<IEnumerable<string>> GetLocationsAsync();
+        Task<IEnumerable<Job>> GetByCompanyIdAsync(int companyId);
     }
+
 }
