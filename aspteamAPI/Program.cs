@@ -14,6 +14,11 @@ builder.Services.AddDbContext<aspteamAPI.context.AppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("conn")));
 
 // Register Repository
+
+
+builder.Services.AddScoped<IJobRepository, JobRepository>();
+
+builder.Services.AddScoped<IJobApplicationRepository, JobApplicationRepository>();
 builder.Services.AddScoped<IAuthRepositories, AuthRepository>();
 //builder.Services.AddScoped<IEmailService, EmailService>();
 // In Program.cs:
