@@ -1,5 +1,7 @@
 ﻿namespace aspteamAPI.Repositories
 {
+    using aspteamAPI.context;
+    using aspteamAPI.IRepository;
     using Microsoft.EntityFrameworkCore;
     using System.Linq.Expressions;
 
