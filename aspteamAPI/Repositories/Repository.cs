@@ -1,9 +1,10 @@
-﻿namespace aspteamAPI.Repositories
+﻿
+using aspteamAPI.context;
+using aspteamAPI.IRepository;
+using Microsoft.EntityFrameworkCore;
+using System.Linq.Expressions;
+namespace aspteamAPI.Repositories
 {
-    using aspteamAPI.context;
-    using aspteamAPI.IRepository;
-    using Microsoft.EntityFrameworkCore;
-    using System.Linq.Expressions;
 
     public class Repository<T> : IRepository<T> where T : class
     {
@@ -13,37 +14,39 @@
         public Repository(AppDbContext context)
         {
             _context = context;
-            _dbSet = context.Set<T>();
+            _dbSet = _context.Set<T>();
         }
 
-        public async Task<IEnumerable<T>> GetAllAsync() => await _dbSet.ToListAsync();
+        public async Task<IEnumerable<T>> GetAllAsync()
+        {
+            return await _dbSet.ToListAsync();
+        }
 
-        public async Task<T?> GetByIdAsync(int id) => await _dbSet.FindAsync(id);
-
-        public async Task<IEnumerable<T>> FindAsync(Expression<Func<T, bool>> predicate) =>
-            await _dbSet.Where(predicate).ToListAsync();
+        public async Task<T?> GetByIdAsync(int id)
+        {
+            return await _dbSet.FindAsync(id);
+        }
 
         public async Task AddAsync(T entity)
         {
             await _dbSet.AddAsync(entity);
-            await _context.SaveChangesAsync();
         }
 
-        public async Task UpdateAsync(T entity)
+        public void Update(T entity)
         {
             _dbSet.Update(entity);
-            await _context.SaveChangesAsync();
         }
 
-        public async Task DeleteAsync(int id)
+        public void Delete(T entity)
         {
-            var entity = await GetByIdAsync(id);
-            if (entity != null)
-            {
-                _dbSet.Remove(entity);
-                await _context.SaveChangesAsync();
-            }
+            _dbSet.Remove(entity);
+        }
+
+        public async Task SaveAsync()
+        {
+            await _context.SaveChangesAsync();
         }
     }
+
 
 }

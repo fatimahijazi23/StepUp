@@ -1,11 +1,12 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using aspteamAPI.DTOs;
 using aspteamAPI.Repositories;
+using Microsoft.AspNetCore.Mvc;
 
 namespace aspteamAPI.Controllers
 {
 
-    [Route("api/[controller]")]
     [ApiController]
+    [Route("api/[controller]")]
     public class JobsController : ControllerBase
     {
         private readonly IJobRepository _jobRepository;
@@ -17,32 +18,32 @@ namespace aspteamAPI.Controllers
 
         // GET /api/jobs
         [HttpGet]
-        public async Task<IActionResult> GetJobs()
+        public async Task<ActionResult<IEnumerable<JobDto>>> GetJobs()
         {
             var jobs = await _jobRepository.GetAllAsync();
-            return Ok(jobs);
+            return Ok(jobs.Select(ToDto));
         }
 
         // GET /api/jobs/{jobId}
         [HttpGet("{jobId}")]
-        public async Task<IActionResult> GetJob(int jobId)
+        public async Task<ActionResult<JobDto>> GetJob(int jobId)
         {
             var job = await _jobRepository.GetByIdAsync(jobId);
             if (job == null) return NotFound();
-            return Ok(job);
+            return Ok(ToDto(job));
         }
 
-        // GET /api/jobs/search?keyword=developer
+        // GET /api/jobs/search?keyword=dev&location=NY&industry=IT
         [HttpGet("search")]
-        public async Task<IActionResult> Search([FromQuery] string keyword)
+        public async Task<ActionResult<IEnumerable<JobDto>>> Search([FromQuery] string? keyword, [FromQuery] string? location, [FromQuery] Industry? industry)
         {
-            var jobs = await _jobRepository.SearchAsync(keyword);
-            return Ok(jobs);
+            var jobs = await _jobRepository.SearchAsync(keyword, location, industry);
+            return Ok(jobs.Select(ToDto));
         }
 
         // GET /api/jobs/categories
         [HttpGet("categories")]
-        public async Task<IActionResult> GetCategories()
+        public async Task<ActionResult<IEnumerable<Industry>>> GetCategories()
         {
             var categories = await _jobRepository.GetCategoriesAsync();
             return Ok(categories);
@@ -50,7 +51,7 @@ namespace aspteamAPI.Controllers
 
         // GET /api/jobs/locations
         [HttpGet("locations")]
-        public async Task<IActionResult> GetLocations()
+        public async Task<ActionResult<IEnumerable<string>>> GetLocations()
         {
             var locations = await _jobRepository.GetLocationsAsync();
             return Ok(locations);
@@ -58,18 +59,51 @@ namespace aspteamAPI.Controllers
 
         // POST /api/jobs
         [HttpPost]
-        public async Task<IActionResult> CreateJob(Job job)
+        public async Task<ActionResult<JobDto>> CreateJob(CreateJobDto dto)
         {
+            var job = new Job
+            {
+                PostedBy = dto.PostedBy,
+                Description = dto.Description,
+                Requirements = dto.Requirements,
+                Location = dto.Location,
+                Industry = dto.Industry,
+                ExperienceLevel = dto.ExperienceLevel,
+                EmploymentType = dto.EmploymentType,
+                WorkArrangement = dto.WorkArrangement,
+                MaxSalaryRange = dto.MaxSalaryRange,
+                MinSalaryRange = dto.MinSalaryRange,
+                CreatedAt = DateTime.UtcNow,
+                IsActive = true
+            };
+
             await _jobRepository.AddAsync(job);
-            return CreatedAtAction(nameof(GetJob), new { jobId = job.Id }, job);
+            await _jobRepository.SaveAsync();
+
+            return CreatedAtAction(nameof(GetJob), new { jobId = job.Id }, ToDto(job));
         }
 
         // PUT /api/jobs/{jobId}
         [HttpPut("{jobId}")]
-        public async Task<IActionResult> UpdateJob(int jobId, Job job)
+        public async Task<IActionResult> UpdateJob(int jobId, UpdateJobDto dto)
         {
-            if (jobId != job.Id) return BadRequest();
-            await _jobRepository.UpdateAsync(job);
+            var job = await _jobRepository.GetByIdAsync(jobId);
+            if (job == null) return NotFound();
+
+            job.Description = dto.Description;
+            job.Requirements = dto.Requirements;
+            job.Location = dto.Location;
+            job.Industry = dto.Industry;
+            job.ExperienceLevel = dto.ExperienceLevel;
+            job.EmploymentType = dto.EmploymentType;
+            job.WorkArrangement = dto.WorkArrangement;
+            job.MaxSalaryRange = dto.MaxSalaryRange;
+            job.MinSalaryRange = dto.MinSalaryRange;
+            job.IsActive = dto.IsActive;
+
+            _jobRepository.Update(job);
+            await _jobRepository.SaveAsync();
+
             return NoContent();
         }
 
@@ -77,17 +111,42 @@ namespace aspteamAPI.Controllers
         [HttpDelete("{jobId}")]
         public async Task<IActionResult> DeleteJob(int jobId)
         {
-            await _jobRepository.DeleteAsync(jobId);
+            var job = await _jobRepository.GetByIdAsync(jobId);
+            if (job == null) return NotFound();
+
+            _jobRepository.Delete(job);
+            await _jobRepository.SaveAsync();
+
             return NoContent();
         }
 
         // GET /api/jobs/company/{companyId}
         [HttpGet("company/{companyId}")]
-        public async Task<IActionResult> GetJobsByCompany(int companyId)
+        public async Task<ActionResult<IEnumerable<JobDto>>> GetJobsByCompany(int companyId)
         {
             var jobs = await _jobRepository.GetByCompanyIdAsync(companyId);
-            return Ok(jobs);
+            return Ok(jobs.Select(ToDto));
         }
+
+        // Helper: map entity -> DTO
+        private static JobDto ToDto(Job job) =>
+            new JobDto
+            {
+                Id = job.Id,
+                PostedBy = job.PostedBy,
+                Description = job.Description,
+                Requirements = job.Requirements,
+                Location = job.Location,
+                Industry = job.Industry,
+                ExperienceLevel = job.ExperienceLevel,
+                EmploymentType = job.EmploymentType,
+                WorkArrangement = job.WorkArrangement,
+                MaxSalaryRange = job.MaxSalaryRange,
+                MinSalaryRange = job.MinSalaryRange,
+                CreatedAt = job.CreatedAt,
+                IsActive = job.IsActive
+            };
     }
+
 
 }

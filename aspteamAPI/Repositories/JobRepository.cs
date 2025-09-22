@@ -5,34 +5,56 @@ using Microsoft.EntityFrameworkCore;
 
 namespace aspteamAPI.Repositories
 {
-    using Microsoft.EntityFrameworkCore;
 
-    public class JobRepository : Repository<Job>, IJobRepository
+    public class JobRepository : IJobRepository
     {
         private readonly AppDbContext _context;
 
-        public JobRepository(AppDbContext context) : base(context)
+        public JobRepository(AppDbContext context)
         {
             _context = context;
         }
 
-        public async Task<IEnumerable<Job>> SearchAsync(string keyword)
+        public async Task<IEnumerable<Job>> GetAllAsync() =>
+            await _context.Jobs.ToListAsync();
+
+        public async Task<Job?> GetByIdAsync(int id) =>
+            await _context.Jobs.FindAsync(id);
+
+        public async Task AddAsync(Job entity)
         {
-            return await _context.Jobs
-                .Include(j => j.Company)
-                .Where(j => j.Description.Contains(keyword) ||
-                            j.Requirements.Contains(keyword) ||
-                            j.Company.CompanyName.Contains(keyword))
-                .ToListAsync();
+            await _context.Jobs.AddAsync(entity);
         }
 
-        public async Task<IEnumerable<string>> GetCategoriesAsync()
+        public void Update(Job entity)
         {
-            return await _context.Jobs
-                .Where(j => j.Industry != null)
-                .Select(j => j.Industry.ToString()!)
-                .Distinct()
-                .ToListAsync();
+            _context.Jobs.Update(entity);
+        }
+
+        public void Delete(Job entity)
+        {
+            _context.Jobs.Remove(entity);
+        }
+
+        public async Task SaveAsync()
+        {
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task<IEnumerable<Job>> SearchAsync(string? keyword, string? location, Industry? industry)
+        {
+            var query = _context.Jobs.AsQueryable();
+
+            if (!string.IsNullOrEmpty(keyword))
+                query = query.Where(j => j.Description!.Contains(keyword) || j.Requirements!.Contains(keyword));
+
+            if (!string.IsNullOrEmpty(location))
+                query = query.Where(j => j.Location == location);
+
+            if (industry.HasValue)
+                query = query.Where(j => j.Industry == industry);
+
+            return await query.ToListAsync();
         }
 
         public async Task<IEnumerable<string>> GetLocationsAsync()
@@ -44,13 +66,22 @@ namespace aspteamAPI.Repositories
                 .ToListAsync();
         }
 
+        public async Task<IEnumerable<Industry>> GetCategoriesAsync()
+        {
+            return await _context.Jobs
+                .Where(j => j.Industry != null)
+                .Select(j => j.Industry!.Value)
+                .Distinct()
+                .ToListAsync();
+        }
+
         public async Task<IEnumerable<Job>> GetByCompanyIdAsync(int companyId)
         {
             return await _context.Jobs
                 .Where(j => j.PostedBy == companyId)
-                .Include(j => j.Company)
                 .ToListAsync();
         }
     }
+
 
 }
