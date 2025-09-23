@@ -279,13 +279,25 @@ namespace aspteamAPI.Controllers
 
         // GET /api/applications/company/all - Get all applications for company
         [HttpGet("company/all")]
-        public async Task<IActionResult> GetAllCompanyApplications([FromQuery] int page = 1, [FromQuery] int pageSize = 10, [FromQuery] ApplicationStatusBadge? status = null)
+        public async Task<IActionResult> GetAllCompanyApplications(
+            [FromQuery] int page = 1,
+            [FromQuery] int pageSize = 10,
+            [FromQuery] ApplicationStatusBadge? status = null,
+            [FromQuery] int testUserId = 1)
         {
             try
             {
+                // For development - use testUserId, in production use JWT
+                int userId;
                 var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-                if (string.IsNullOrEmpty(userIdClaim) || !int.TryParse(userIdClaim, out int userId))
-                    return Unauthorized("Invalid user token");
+                if (!string.IsNullOrEmpty(userIdClaim) && int.TryParse(userIdClaim, out int jwtUserId))
+                {
+                    userId = jwtUserId; // Use JWT if available
+                }
+                else
+                {
+                    userId = testUserId; // Fallback to test user ID
+                }
 
                 var result = await _jobApplicationRepo.GetCompanyApplicationsAsync(userId, page, pageSize, status);
                 return Ok(result);
