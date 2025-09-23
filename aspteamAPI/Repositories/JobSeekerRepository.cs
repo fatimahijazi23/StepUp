@@ -27,9 +27,15 @@ namespace aspteamAPI.Repositories
                 if (existingFollow != null)
                     return false; // Already following
 
-                // Check if company exists
-                var company = await GetCompanyByIdAsync(companyId);
-                if (company == null)
+                // Check if company exists and get jobseeker info for notification
+                var company = await _context.CompanyAccounts
+                    .FirstOrDefaultAsync(c => c.Id == companyId);
+
+                var jobSeeker = await _context.JobSeekerAccounts
+                    .Include(js => js.User)
+                    .FirstOrDefaultAsync(js => js.Id == jobSeekerId);
+
+                if (company == null || jobSeeker == null)
                     return false;
 
                 var follow = new Follow
@@ -46,8 +52,10 @@ namespace aspteamAPI.Repositories
                 {
                     UserId = company.UserId,
                     Title = "New Follower",
-                    Message = "A job seeker started following your company",
-                    Type = "follow"
+                    Message = $"{jobSeeker.User.Name} started following your company",
+                    Type = "follow",
+                    CreatedAt = DateTime.UtcNow,
+                    IsRead = false
                 };
                 _context.Notifications.Add(notification);
 
@@ -65,12 +73,28 @@ namespace aspteamAPI.Repositories
             try
             {
                 var follow = await _context.Follows
+                    .Include(f => f.Company)
+                    .Include(f => f.JobSeeker)
+                    .ThenInclude(js => js.User)
                     .FirstOrDefaultAsync(f => f.JobSeekerId == jobSeekerId && f.CompanyId == companyId);
 
                 if (follow == null)
                     return false;
 
                 _context.Follows.Remove(follow);
+
+                // Create notification for company about unfollow
+                var notification = new Notification
+                {
+                    UserId = follow.Company.UserId,
+                    Title = "Follower Update",
+                    Message = $"{follow.JobSeeker.User.Name} unfollowed your company",
+                    Type = "unfollow",
+                    CreatedAt = DateTime.UtcNow,
+                    IsRead = false
+                };
+                _context.Notifications.Add(notification);
+
                 await _context.SaveChangesAsync();
                 return true;
             }
@@ -128,6 +152,26 @@ namespace aspteamAPI.Repositories
                     };
                 }
 
+                // Create notification for job seeker when evaluation starts
+                var jobSeeker = await _context.JobSeekerAccounts
+                    .Include(js => js.User)
+                    .FirstOrDefaultAsync(js => js.Id == jobSeekerId);
+
+                if (jobSeeker != null)
+                {
+                    var notification = new Notification
+                    {
+                        UserId = jobSeeker.UserId,
+                        Title = "CV Evaluation Started",
+                        Message = "Your CV evaluation is being processed. You'll be notified when it's complete.",
+                        Type = "evaluation",
+                        CreatedAt = DateTime.UtcNow,
+                        IsRead = false
+                    };
+                    _context.Notifications.Add(notification);
+                    await _context.SaveChangesAsync();
+                }
+
                 // TODO: Here you would integrate with your friend's AI evaluation service
                 // For now, returning a placeholder response
                 var placeholderEvaluation = new CVEvaluationResponseDto
@@ -147,6 +191,36 @@ namespace aspteamAPI.Repositories
             catch
             {
                 throw;
+            }
+        }
+
+        // Method to notify when CV evaluation is completed (call this when AI service completes)
+        public async Task NotifyEvaluationCompleteAsync(int jobSeekerId, int cvId)
+        {
+            try
+            {
+                var jobSeeker = await _context.JobSeekerAccounts
+                    .Include(js => js.User)
+                    .FirstOrDefaultAsync(js => js.Id == jobSeekerId);
+
+                if (jobSeeker != null)
+                {
+                    var notification = new Notification
+                    {
+                        UserId = jobSeeker.UserId,
+                        Title = "CV Evaluation Complete",
+                        Message = "Your CV evaluation has been completed. Check your results now!",
+                        Type = "evaluation_complete",
+                        CreatedAt = DateTime.UtcNow,
+                        IsRead = false
+                    };
+                    _context.Notifications.Add(notification);
+                    await _context.SaveChangesAsync();
+                }
+            }
+            catch
+            {
+                // Log error but don't throw
             }
         }
 
@@ -209,4 +283,3 @@ namespace aspteamAPI.Repositories
         }
     }
 }
-

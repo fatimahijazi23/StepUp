@@ -1,6 +1,7 @@
 ﻿using aspteamAPI.context;
 using aspteamAPI.DTOs;
 using aspteamAPI.IRepository;
+using aspteamAPI.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace aspteamAPI.Repositories
@@ -20,6 +21,7 @@ namespace aspteamAPI.Repositories
             {
                 // Get the job seeker account for the current user
                 var jobSeeker = await _context.JobSeekerAccounts
+                    .Include(js => js.User)
                     .FirstOrDefaultAsync(js => js.UserId == userId);
 
                 if (jobSeeker == null)
@@ -33,6 +35,7 @@ namespace aspteamAPI.Repositories
 
                 // Check if job exists and is active
                 var job = await _context.Jobs
+                    .Include(j => j.Company)
                     .FirstOrDefaultAsync(j => j.Id == dto.JobId && j.IsActive);
 
                 if (job == null)
@@ -81,6 +84,19 @@ namespace aspteamAPI.Repositories
                 };
 
                 _context.JobApplications.Add(application);
+
+                // CREATE NOTIFICATION FOR COMPANY OWNER
+                var notification = new Notification
+                {
+                    UserId = job.Company.UserId,
+                    Title = "New Job Application",
+                    Message = $"{jobSeeker.User.Name} applied for {job.Title}",
+                    Type = "application",
+                    CreatedAt = DateTime.UtcNow,
+                    IsRead = false
+                };
+                _context.Notifications.Add(notification);
+
                 await _context.SaveChangesAsync();
 
                 // Load related data for response
@@ -230,6 +246,8 @@ namespace aspteamAPI.Repositories
             {
                 var application = await _context.JobApplications
                     .Include(ja => ja.Applicant)
+                    .Include(ja => ja.Job)
+                        .ThenInclude(j => j.Company)
                     .FirstOrDefaultAsync(ja => ja.Id == applicationId);
 
                 if (application == null)
@@ -260,6 +278,18 @@ namespace aspteamAPI.Repositories
                         Message = "Cannot delete application in current status"
                     };
                 }
+
+                // CREATE NOTIFICATION FOR COMPANY OWNER ABOUT WITHDRAWAL
+                var notification = new Notification
+                {
+                    UserId = application.Job.Company.UserId,
+                    Title = "Application Withdrawn",
+                    Message = $"A candidate withdrew their application for {application.Job.Title}",
+                    Type = "application_withdrawn",
+                    CreatedAt = DateTime.UtcNow,
+                    IsRead = false
+                };
+                _context.Notifications.Add(notification);
 
                 _context.JobApplications.Remove(application);
                 await _context.SaveChangesAsync();
@@ -380,6 +410,7 @@ namespace aspteamAPI.Repositories
                     };
                 }
 
+                var oldStatus = application.Status;
                 application.Status = dto.Status;
 
                 // Add evaluation note if provided
@@ -399,6 +430,39 @@ namespace aspteamAPI.Repositories
                     {
                         application.Evaluation.Notes = dto.Notes;
                     }
+                }
+
+                // CREATE NOTIFICATION FOR JOB SEEKER ABOUT STATUS CHANGE
+                if (oldStatus != dto.Status) // Only notify if status actually changed
+                {
+                    string statusMessage = dto.Status switch
+                    {
+                        ApplicationStatusBadge.Applied => $"Your application for {application.Job.Title} has been received",
+                        ApplicationStatusBadge.UnderReview => $"Your application for {application.Job.Title} is now under review",
+                        ApplicationStatusBadge.Interview => $"Great news! You've been invited for an interview for {application.Job.Title}",
+                        ApplicationStatusBadge.Hired => $"Congratulations! You've been hired for {application.Job.Title}",
+                        ApplicationStatusBadge.Rejected => $"Thank you for your interest. Your application for {application.Job.Title} was not selected",
+                        _ => $"Your application status for {application.Job.Title} has been updated"
+                    };
+
+                    string notificationTitle = dto.Status switch
+                    {
+                        ApplicationStatusBadge.Interview => "Interview Invitation",
+                        ApplicationStatusBadge.Hired => "Job Offer",
+                        ApplicationStatusBadge.Rejected => "Application Update",
+                        _ => "Application Status Update"
+                    };
+
+                    var notification = new Notification
+                    {
+                        UserId = application.Applicant.UserId,
+                        Title = notificationTitle,
+                        Message = statusMessage,
+                        Type = "application_status",
+                        CreatedAt = DateTime.UtcNow,
+                        IsRead = false
+                    };
+                    _context.Notifications.Add(notification);
                 }
 
                 await _context.SaveChangesAsync();
@@ -559,4 +623,3 @@ namespace aspteamAPI.Repositories
         }
     }
 }
-

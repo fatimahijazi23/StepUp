@@ -5,6 +5,7 @@ namespace aspteamAPI.IRepository
 {
     public interface IJobSeekerRepository
     {
+        Task NotifyEvaluationCompleteAsync(int jobSeekerId, int cvId);
         Task<bool> FollowCompanyAsync(int jobSeekerId, int companyId);
         Task<bool> UnfollowCompanyAsync(int jobSeekerId, int companyId);
         Task<IEnumerable<FollowedCompanyDto>> GetFollowedCompaniesAsync(int jobSeekerId);

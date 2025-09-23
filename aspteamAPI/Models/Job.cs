@@ -6,7 +6,8 @@ public class Job
 
     [Required]
     public int PostedBy { get; set; }
-
+    [Required]
+    public string Title { get; set; } = string.Empty;
     public string? Description { get; set; }
     public string? Requirements { get; set; }
     public string? Location { get; set; }
