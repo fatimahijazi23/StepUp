@@ -26,6 +26,7 @@ builder.Services.AddScoped<IEmailService, MockEmailService>();
 builder.Services.AddScoped<IJobSeekerRepository, JobSeekerRepository>();
 builder.Services.AddScoped<IJobSeekerProfileRepo, JobSeekerProfileRepository>();
 builder.Services.AddScoped<ICompanyProfileRepository, CompanyProfileRepository>();
+builder.Services.AddScoped<ICompanyRepository, CompanyRepository>();
 builder.Services.AddScoped<ICvRepository, CvRepository>();
 
 // Add Controllers
