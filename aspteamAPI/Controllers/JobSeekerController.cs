@@ -1,16 +1,16 @@
 ﻿using aspteamAPI.DTOs;
 using aspteamAPI.IRepository;
 using System.Security.Claims;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 
 namespace aspteamAPI.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize] // Ensure JWT authentication is required
     public class JobSeekerController : ControllerBase
     {
-
         private readonly IJobSeekerRepository _jobSeekerRepository;
 
         public JobSeekerController(IJobSeekerRepository jobSeekerRepository)
@@ -18,27 +18,25 @@ namespace aspteamAPI.Controllers
             _jobSeekerRepository = jobSeekerRepository;
         }
 
+        // Helper method to get the current user's ID from JWT
         private int GetCurrentUserId()
         {
             var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            return int.Parse(userIdClaim ?? "0");
+            if (string.IsNullOrEmpty(userIdClaim))
+                throw new UnauthorizedAccessException("User ID claim not found in JWT");
+            return int.Parse(userIdClaim);
         }
 
         [HttpPost("follow-company/{companyId}")]
-        public async Task<IActionResult> FollowCompany(int companyId, [FromQuery] int testUserId = 1)
+        public async Task<IActionResult> FollowCompany(int companyId)
         {
             try
             {
-                // For testing - remove this line when auth is working
-                var userId = testUserId;
-                // var userId = GetCurrentUserId(); // Use this when auth is fixed
-
+                var userId = GetCurrentUserId();
                 var jobSeeker = await _jobSeekerRepository.GetJobSeekerByUserIdAsync(userId);
 
                 if (jobSeeker == null)
-                {
                     return BadRequest($"Job seeker account not found for user ID: {userId}");
-                }
 
                 var result = await _jobSeekerRepository.FollowCompanyAsync(jobSeeker.Id, companyId);
 
@@ -47,6 +45,10 @@ namespace aspteamAPI.Controllers
 
                 return Ok(new { message = "Successfully followed company" });
             }
+            catch (UnauthorizedAccessException ex)
+            {
+                return Unauthorized(new { message = ex.Message });
+            }
             catch (Exception ex)
             {
                 return StatusCode(500, new { message = "An error occurred", error = ex.Message });
@@ -54,14 +56,11 @@ namespace aspteamAPI.Controllers
         }
 
         [HttpDelete("unfollow-company/{companyId}")]
-        public async Task<IActionResult> UnfollowCompany(int companyId, [FromQuery] int testUserId = 1)
+        public async Task<IActionResult> UnfollowCompany(int companyId)
         {
             try
             {
-                // For testing - remove this line when auth is working
-                var userId = testUserId;
-                // var userId = GetCurrentUserId(); // Use this when auth is fixed
-
+                var userId = GetCurrentUserId();
                 var jobSeeker = await _jobSeekerRepository.GetJobSeekerByUserIdAsync(userId);
 
                 if (jobSeeker == null)
@@ -74,6 +73,10 @@ namespace aspteamAPI.Controllers
 
                 return Ok(new { message = "Successfully unfollowed company" });
             }
+            catch (UnauthorizedAccessException ex)
+            {
+                return Unauthorized(new { message = ex.Message });
+            }
             catch (Exception ex)
             {
                 return StatusCode(500, new { message = "An error occurred", error = ex.Message });
@@ -81,14 +84,11 @@ namespace aspteamAPI.Controllers
         }
 
         [HttpGet("followed-companies")]
-        public async Task<IActionResult> GetFollowedCompanies([FromQuery] int testUserId = 1)
+        public async Task<IActionResult> GetFollowedCompanies()
         {
             try
             {
-                // For testing - remove this line when auth is working
-                var userId = testUserId;
-                // var userId = GetCurrentUserId(); // Use this when auth is fixed
-
+                var userId = GetCurrentUserId();
                 var jobSeeker = await _jobSeekerRepository.GetJobSeekerByUserIdAsync(userId);
 
                 if (jobSeeker == null)
@@ -97,6 +97,10 @@ namespace aspteamAPI.Controllers
                 var companies = await _jobSeekerRepository.GetFollowedCompaniesAsync(jobSeeker.Id);
                 return Ok(companies);
             }
+            catch (UnauthorizedAccessException ex)
+            {
+                return Unauthorized(new { message = ex.Message });
+            }
             catch (Exception ex)
             {
                 return StatusCode(500, new { message = "An error occurred", error = ex.Message });
@@ -104,14 +108,11 @@ namespace aspteamAPI.Controllers
         }
 
         [HttpPost("evaluate-cv")]
-        public async Task<IActionResult> EvaluateCV([FromBody] CVEvaluationRequestDto request, [FromQuery] int testUserId = 1)
+        public async Task<IActionResult> EvaluateCV([FromBody] CVEvaluationRequestDto request)
         {
             try
             {
-                // For testing - remove this line when auth is working
-                var userId = testUserId;
-                // var userId = GetCurrentUserId(); // Use this when auth is fixed
-
+                var userId = GetCurrentUserId();
                 var jobSeeker = await _jobSeekerRepository.GetJobSeekerByUserIdAsync(userId);
 
                 if (jobSeeker == null)
@@ -131,16 +132,17 @@ namespace aspteamAPI.Controllers
         }
 
         [HttpGet("notifications")]
-        public async Task<IActionResult> GetNotifications([FromQuery] int testUserId = 1)
+        public async Task<IActionResult> GetNotifications()
         {
             try
             {
-                // For testing - remove this line when auth is working
-                var userId = testUserId;
-                // var userId = GetCurrentUserId(); // Use this when auth is fixed
-
+                var userId = GetCurrentUserId();
                 var notifications = await _jobSeekerRepository.GetNotificationsAsync(userId);
                 return Ok(notifications);
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return Unauthorized(new { message = ex.Message });
             }
             catch (Exception ex)
             {
@@ -149,20 +151,21 @@ namespace aspteamAPI.Controllers
         }
 
         [HttpPut("notifications/{notificationId}/mark-read")]
-        public async Task<IActionResult> MarkNotificationAsRead(int notificationId, [FromQuery] int testUserId = 1)
+        public async Task<IActionResult> MarkNotificationAsRead(int notificationId)
         {
             try
             {
-                // For testing - remove this line when auth is working
-                var userId = testUserId;
-                // var userId = GetCurrentUserId(); // Use this when auth is fixed
-
+                var userId = GetCurrentUserId();
                 var result = await _jobSeekerRepository.MarkNotificationAsReadAsync(userId, notificationId);
 
                 if (!result)
                     return BadRequest("Notification not found or doesn't belong to current user");
 
                 return Ok(new { message = "Notification marked as read" });
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return Unauthorized(new { message = ex.Message });
             }
             catch (Exception ex)
             {
@@ -171,12 +174,9 @@ namespace aspteamAPI.Controllers
         }
 
         [HttpGet("debug/current-user")]
-        public async Task<IActionResult> GetCurrentUserDebug([FromQuery] int testUserId = 1)
+        public async Task<IActionResult> GetCurrentUserDebug()
         {
-            // For testing - remove this line when auth is working
-            var userId = testUserId;
-            // var userId = GetCurrentUserId(); // Use this when auth is fixed
-
+            var userId = GetCurrentUserId();
             var jobSeeker = await _jobSeekerRepository.GetJobSeekerByUserIdAsync(userId);
 
             return Ok(new
@@ -188,4 +188,3 @@ namespace aspteamAPI.Controllers
         }
     }
 }
-   

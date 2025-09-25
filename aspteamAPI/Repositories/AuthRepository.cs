@@ -344,15 +344,17 @@ namespace aspteamAPI.Repositories
         {
             var claims = new[]
             {
-                new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
-                new Claim(ClaimTypes.Email, user.Email),
-                new Claim(ClaimTypes.Role, user.Role.ToString())
-            };
+        new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
+        new Claim(ClaimTypes.Email, user.Email),
+        new Claim(ClaimTypes.Role, user.Role.ToString())
+    };
 
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["Jwt:Key"]));
             var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
             var token = new JwtSecurityToken(
+                issuer: _config["Jwt:Issuer"],        // ADD THIS
+                audience: _config["Jwt:Audience"],    // ADD THIS
                 claims: claims,
                 expires: DateTime.UtcNow.AddHours(12),
                 signingCredentials: creds);

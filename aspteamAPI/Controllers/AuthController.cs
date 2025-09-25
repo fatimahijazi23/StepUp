@@ -4,7 +4,7 @@ using System.Security.Claims;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using aspteamAPI.IRepository;
-
+using System.IdentityModel.Tokens.Jwt;
 namespace aspteamAPI.Controllers
 {
     [Route("api/[controller]")]
@@ -18,6 +18,9 @@ namespace aspteamAPI.Controllers
             {
                 _repo = repo;
             }
+
+
+        //Registration for both JobSeeker And Compnay:
 
             [HttpPost("register-jobseeker")]
             public async Task<IActionResult> RegisterJobSeeker([FromBody] RegisterJobSeekerDto dto)
@@ -33,7 +36,11 @@ namespace aspteamAPI.Controllers
                 return Ok(result);
             }
 
-            [HttpPost("login-jobseeker")]
+
+
+        //Login for both JobSeeker And Compnay:
+
+        [HttpPost("login-jobseeker")]
             public async Task<IActionResult> LoginJobSeeker([FromBody] LoginDto dto)
             {
                 var result = await _repo.LoginJobSeekerAsync(dto);
@@ -47,15 +54,30 @@ namespace aspteamAPI.Controllers
                 return Ok(result);
             }
 
-
+        //Logout for both :
         [HttpPost("logout")]
-        public async Task<IActionResult> Logout([FromQuery] int testUserId = 1)
+        [Authorize] // Add authorization to ensure valid token
+        public async Task<IActionResult> Logout()
         {
             try
             {
-                // For development - just use test user ID
-                var userId = testUserId;
-                var tokenId = Guid.NewGuid().ToString(); // Generate fake token ID
+                // Get user ID from JWT claims
+                var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+                if (userIdClaim == null)
+                {
+                    return Unauthorized(new LogoutResponseDto { Success = false, Message = "Invalid token" });
+                }
+
+                var userId = int.Parse(userIdClaim.Value);
+
+                // Get JTI (token ID) from JWT claims
+                var jtiClaim = User.FindFirst(JwtRegisteredClaimNames.Jti);
+                if (jtiClaim == null)
+                {
+                    return BadRequest(new LogoutResponseDto { Success = false, Message = "Token ID not found" });
+                }
+
+                var tokenId = jtiClaim.Value;
 
                 var result = await _repo.LogoutAsync(tokenId, userId);
 
@@ -64,13 +86,17 @@ namespace aspteamAPI.Controllers
                     return Ok(new LogoutResponseDto { Success = true, Message = "Successfully logged out" });
                 }
 
-                return Ok(new LogoutResponseDto { Success = false, Message = "Logout failed" });
+                return BadRequest(new LogoutResponseDto { Success = false, Message = "Logout failed" });
             }
             catch (Exception ex)
             {
                 return StatusCode(500, new LogoutResponseDto { Success = false, Message = "An error occurred" });
             }
         }
+
+
+
+        //Forgot Password:
 
         [HttpPost("forgot-password")]
         public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordDto dto)
@@ -92,6 +118,9 @@ namespace aspteamAPI.Controllers
                 });
             }
         }
+
+
+        //Reset Password :
 
         [HttpPost("reset-password")]
         public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordDto dto)

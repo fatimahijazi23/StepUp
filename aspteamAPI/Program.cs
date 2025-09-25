@@ -6,6 +6,7 @@ using System.Text;
 using aspteamAPI.IRepository;
 using Microsoft.OpenApi.Models;
 using aspteamAPI;
+using aspteamAPI.Middleware;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -97,6 +98,8 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 
 app.UseAuthentication(); // ✅ Add Authentication before Authorization
+app.UseMiddleware<TokenBlacklistMiddleware>(); 
+
 app.UseAuthorization();
 
 app.MapControllers();
