@@ -1,0 +1,85 @@
+﻿@page
+@model aspteamWeb.Pages.Company.CompanyFormModel
+@{
+    ViewData["Title"] = "Company Job Postings";
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - StepUp</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f8faff;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .job-card {
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            padding: 20px;
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        .status-badge {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            background: #d4f4dd;
+            color: #198754;
+            font-weight: 500;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+        }
+
+        .btn-outline-secondary {
+            border: 1px solid #dee2e6;
+        }
+    </style>
+</head>
+<body>
+    <div class="container mt-5">
+        <h4 class="mb-4">Your Job Postings</h4>
+
+        @foreach (var job in Model.JobPostings)
+        {
+            <div class="job-card">
+                <h5 class="fw-bold">@job.Title</h5>
+                <p class="text-muted">@job.Location • @job.Type</p>
+                <div class="d-flex align-items-center text-muted mb-3">
+                    <span class="me-3">
+                        👥 @job.ApplicantsCount applicants
+                    </span>
+                    <span>
+                        📅 Posted @((DateTime.Now - job.PostedDate).Days) days ago
+                    </span>
+                </div>
+
+                <div class="d-flex gap-2">
+                    <a asp-page="/JobSeeker/ViewJob" asp-route-id="@job.Id" class="btn btn-primary">View Details</a>
+                    <a asp-page="/Company/ViewApplicants" asp-route-id="@job.Id" class="btn btn-outline-secondary">
+                        View Applicants (@job.ApplicantsCount)
+                    </a>
+                    <form method="post" asp-page-handler="CloseJob" asp-route-id="@job.Id">
+                        <button type="submit" class="btn btn-outline-secondary">Close Job</button>
+                    </form>
+                </div>
+
+                <span class="status-badge">@job.Status</span>
+            </div>
+        }
+
+        @if (!Model.JobPostings.Any())
+        {
+            <div class="alert alert-info">No job postings found.</div>
+        }
+    </div>
+</body>
+</html>

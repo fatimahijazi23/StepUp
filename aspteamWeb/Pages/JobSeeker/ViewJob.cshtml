@@ -1,0 +1,54 @@
+﻿@page "{id:int}"
+@model aspteamWeb.Pages.JobSeeker.ViewJobModel
+@{
+    ViewData["Title"] = "Job Details";
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@Model.Job?.Title - StepUp</title>
+
+    <!-- Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+</head>
+<body style="background-color:#f8faff;font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">
+    <div class="container mt-5">
+        @if (Model.Job == null)
+        {
+            <div class="alert alert-danger">Job not found.</div>
+        }
+        else
+        {
+            <div class="card shadow-sm p-4">
+                <h3 class="fw-bold">@Model.Job.Title</h3>
+                <p class="text-primary fw-semibold">@Model.Job.CompanyName</p>
+
+                <div class="d-flex flex-wrap text-muted mb-3">
+                    <div class="me-3"><i class="bi bi-geo-alt"></i> @Model.Job.Location</div>
+                    <div class="me-3"><i class="bi bi-briefcase"></i> @Model.Job.Type</div>
+                    <div class="me-3"><i class="bi bi-diagram-3"></i> @Model.Job.Level</div>
+                    <div class="me-3"><i class="bi bi-clock"></i> Posted @Model.Job.PostedAt.ToString("MMM dd, yyyy")</div>
+                    <div class="me-3"><i class="bi bi-currency-dollar"></i> @Model.Job.SalaryRange</div>
+                </div>
+
+                <hr />
+
+                <h5 class="fw-bold">Job Description</h5>
+                <p>@Model.Job.Description</p>
+
+                <h5 class="fw-bold">Requirements</h5>
+                <p>@Model.Job.Requirements</p>
+
+                <h5 class="fw-bold">Benefits</h5>
+                <p>@Model.Job.Benefits</p>
+
+                <hr />
+                <button class="btn btn-primary"><i class="bi bi-file-earmark-text"></i> Test Resume</button>
+            </div>
+        }
+    </div>
+</body>
+</html>
