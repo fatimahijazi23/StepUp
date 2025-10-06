@@ -2,7 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using System.ComponentModel.DataAnnotations;
 
-namespace teamProject.WEB.Pages.JobSeeker
+namespace aspteamWeb.Pages.JobSeeker
 {
     public class RegisterModel : PageModel
     {
@@ -60,7 +60,8 @@ namespace teamProject.WEB.Pages.JobSeeker
 
                 if (response.IsSuccessStatusCode)
                 {
-                    TempData["SuccessMessage"] = "Account created successfully! Please log in.";
+                    TempData["SuccessMessage"] = "Account created successfully!";
+                   
                     return RedirectToPage("/Login");
                 }
 

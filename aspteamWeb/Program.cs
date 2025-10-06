@@ -6,6 +6,7 @@ using System;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddHttpClient();
+builder.Services.AddSession();
 
 // Add services to the container.
 builder.Services.AddRazorPages();
@@ -29,4 +30,5 @@ app.UseRouting();
 app.UseAuthorization();
 
 app.MapRazorPages();
+app.UseSession();
 app.Run();

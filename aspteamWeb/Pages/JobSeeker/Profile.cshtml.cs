@@ -6,8 +6,8 @@ namespace aspteamWeb.Pages.JobSeeker
     public class ProfileModel : PageModel
     {
         // Displayed profile data
-        public string UserName { get; set; } = "rasha";
-        public string Email { get; set; } = "tr@gmail.com";
+        public string UserName { get; set; } 
+        public string Email { get; set; } 
         public string? About { get; set; } = null;
         public int FollowingCount { get; set; } = 0;
 
@@ -23,7 +23,7 @@ namespace aspteamWeb.Pages.JobSeeker
 
         public void OnGet()
         {
-            // Load user profile (mocked for now)
+            
             Input.UserName = UserName;
             Input.Email = Email;
             Input.About = About;

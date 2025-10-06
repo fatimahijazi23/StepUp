@@ -1,5 +1,5 @@
 ﻿@page
-@model teamProject.WEB.Pages.LoginModel
+@model aspteamWeb.Pages.LoginModel
 @{
     ViewData["Title"] = "Login";
     Layout = null; 
@@ -82,14 +82,23 @@
 
 <div class="login-container">
     <h2>Welcome Back</h2>
+    @if (!ViewData.ModelState.IsValid)
+    {
+        <div class="alert alert-danger">
+            @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+            {
+                <div>@error.ErrorMessage</div>
+            }
+        </div>
+    }
     <form method="post">
         <div class="mb-3">
             <label class="form-label">Email</label>
-            <input type="email" class="form-control" required />
+            <input asp-for="Input.Email" type="email" class="form-control" required />
         </div>
         <div class="mb-3">
             <label class="form-label">Password</label>
-            <input type="password" class="form-control" required />
+            <input asp-for="Input.Password" type="password" class="form-control" required />
         </div>
         <button type="submit" class="btn btn-custom">Login</button>
        
