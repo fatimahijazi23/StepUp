@@ -2,7 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using System.Net.Http;
 using System.Net.Http.Json;
-
+  
 namespace aspteamWeb.Pages.JobSeeker
 {
     public class ViewJobModel : PageModel
