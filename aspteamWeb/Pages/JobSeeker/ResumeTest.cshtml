@@ -1,17 +1,43 @@
-﻿@page
-@model ResumeTestModel
+@page
+@model aspteamWeb.Pages.JobSeeker.ResumeTestModel
 @{
     ViewData["Title"] = "Test Your Resume";
 }
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - StepUp</title>
+<div class="container">
+    <div class="resume-card">
+        <h3 class="text-center mb-4">Test Your Resume</h3>
 
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+        <form method="post" enctype="multipart/form-data">
+            <!-- Upload Resume -->
+            <div class="mb-4">
+                <label class="form-label fw-bold">Upload Resume (PDF/DOCX)</label>
+                <div class="upload-box" onclick="document.getElementById('resumeFile').click();">
+                    <p>📄 Choose file or drag and drop</p>
+                </div>
+                <input id="resumeFile" asp-for="ResumeFile" type="file" class="form-control d-none" />
+            </div>
+
+            <!-- Job Description -->
+            <div class="mb-3">
+                <label class="form-label fw-bold">Job Description</label>
+                <textarea asp-for="JobDescription" class="form-control" rows="6"
+                          placeholder="Paste the job description here..."></textarea>
+            </div>
+
+            <!-- Submit -->
+            <button type="submit" class="btn btn-custom">Analyze Resume</button>
+        </form>
+
+        @if (Model.ResultMessage != null)
+        {
+            <div class="alert alert-info mt-3">@Model.ResultMessage</div>
+        }
+    </div>
+</div>
+
+@section Styles {
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
     <style>
         body {
             background-color: #f4f8fc;
@@ -33,6 +59,11 @@
             padding: 40px 20px;
             color: #0d6efd;
             cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .upload-box:hover {
+            background-color: #e9f2ff;
         }
 
         .btn-custom {
@@ -42,38 +73,24 @@
             width: 100%;
         }
     </style>
-</head>
-<body>
-    <div class="container">
-        <div class="resume-card">
-            <h3 class="text-center mb-4">Test Your Resume</h3>
+}
 
-            <form method="post" enctype="multipart/form-data">
-                <!-- Upload Resume -->
-                <div class="mb-4">
-                    <label class="form-label fw-bold">Upload Resume (PDF/DOCX)</label>
-                    <div class="upload-box" onclick="document.getElementById('resumeFile').click();">
-                        <p>📄 Choose file or drag and drop</p>
-                    </div>
-                    <input id="resumeFile" asp-for="ResumeFile" type="file" class="form-control d-none" />
-                </div>
+@section Scripts {
+    <script>
+        document.querySelector('.upload-box').addEventListener('dragover', function (e) {
+            e.preventDefault();
+            this.style.backgroundColor = '#e9f2ff';
+        });
 
-                <!-- Job Description -->
-                <div class="mb-3">
-                    <label class="form-label fw-bold">Job Description</label>
-                    <textarea asp-for="JobDescription" class="form-control" rows="6"
-                              placeholder="Paste the job description here..."></textarea>
-                </div>
+        document.querySelector('.upload-box').addEventListener('dragleave', function () {
+            this.style.backgroundColor = '';
+        });
 
-                <!-- Submit -->
-                <button type="submit" class="btn btn-custom">Analyze Resume</button>
-            </form>
-
-            @if (Model.ResultMessage != null)
-            {
-                <div class="alert alert-info mt-3">@Model.ResultMessage</div>
-            }
-        </div>
-    </div>
-</body>
-</html>
+        document.querySelector('.upload-box').addEventListener('drop', function (e) {
+            e.preventDefault();
+            this.style.backgroundColor = '';
+            const fileInput = document.getElementById('resumeFile');
+            fileInput.files = e.dataTransfer.files;
+        });
+    </script>
+}
