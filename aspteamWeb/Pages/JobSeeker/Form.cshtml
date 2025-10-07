@@ -1,18 +1,74 @@
-﻿@page
-@model aspteamWeb.Pages.JobSeeker.FormModel
+@page
+@model aspteamWeb.Pages.JobSeeker.FormcshtmlModel
 @{
     ViewData["Title"] = "Create Job Posting";
 }
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - StepUp</title>
+<div class="container">
+    <div class="job-form-card">
+        <h4>Create Job Posting</h4>
 
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+        <form method="post">
+            <div class="mb-3">
+                <label class="form-label">Job Title</label>
+                <input asp-for="Input.Title" class="form-control" placeholder="e.g. Senior Software Engineer" />
+            </div>
 
+            <div class="mb-3">
+                <label class="form-label">Company Name</label>
+                <input asp-for="Input.CompanyName" class="form-control" placeholder="e.g. TechCorp" />
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Location</label>
+                <input asp-for="Input.Location" class="form-control" placeholder="e.g. San Francisco, CA" />
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Description</label>
+                <textarea asp-for="Input.Description" class="form-control" rows="3"
+                          placeholder="Write a short job description..."></textarea>
+            </div>
+
+            <div class="row">
+                <div class="col-md-4 mb-3">
+                    <label class="form-label">Job Type</label>
+                    <select asp-for="Input.JobType" class="form-select">
+                        <option>Full-time</option>
+                        <option>Part-time</option>
+                        <option>Internship</option>
+                        <option>Contract</option>
+                    </select>
+                </div>
+
+                <div class="col-md-4 mb-3">
+                    <label class="form-label">Industry</label>
+                    <input asp-for="Input.Industry" class="form-control" placeholder="e.g. Technology" />
+                </div>
+
+                <div class="col-md-4 mb-3">
+                    <label class="form-label">Salary Range</label>
+                    <input asp-for="Input.SalaryRange" class="form-control" placeholder="$120,000 - $160,000" />
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Posted Date</label>
+                <input asp-for="Input.PostedDate" class="form-control" type="date" />
+            </div>
+
+            <button type="submit" class="btn btn-custom">Submit Job</button>
+        </form>
+
+        @if (TempData["Success"] != null)
+        {
+            <div class="alert alert-success mt-3">@TempData["Success"]</div>
+        }
+    </div>
+</div>
+
+@section Styles {
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
     <style>
         body {
             background-color: #f8faff;
@@ -27,10 +83,10 @@
             margin-top: 40px;
         }
 
-            .job-form-card h4 {
-                font-weight: bold;
-                margin-bottom: 20px;
-            }
+        .job-form-card h4 {
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
 
         .btn-custom {
             background-color: #0d6efd;
@@ -38,69 +94,5 @@
             font-weight: 500;
         }
     </style>
-</head>
-<body>
-    <div class="container">
-        <div class="job-form-card">
-            <h4>Create Job Posting</h4>
+}
 
-            <form method="post">
-                <div class="mb-3">
-                    <label class="form-label">Job Title</label>
-                    <input asp-for="Input.Title" class="form-control" placeholder="e.g. Senior Software Engineer" />
-                </div>
-
-                <div class="mb-3">
-                    <label class="form-label">Company Name</label>
-                    <input asp-for="Input.CompanyName" class="form-control" placeholder="e.g. TechCorp" />
-                </div>
-
-                <div class="mb-3">
-                    <label class="form-label">Location</label>
-                    <input asp-for="Input.Location" class="form-control" placeholder="e.g. San Francisco, CA" />
-                </div>
-
-                <div class="mb-3">
-                    <label class="form-label">Description</label>
-                    <textarea asp-for="Input.Description" class="form-control" rows="3"
-                              placeholder="Write a short job description..."></textarea>
-                </div>
-
-                <div class="row">
-                    <div class="col-md-4 mb-3">
-                        <label class="form-label">Job Type</label>
-                        <select asp-for="Input.JobType" class="form-select">
-                            <option>Full-time</option>
-                            <option>Part-time</option>
-                            <option>Internship</option>
-                            <option>Contract</option>
-                        </select>
-                    </div>
-
-                    <div class="col-md-4 mb-3">
-                        <label class="form-label">Industry</label>
-                        <input asp-for="Input.Industry" class="form-control" placeholder="e.g. Technology" />
-                    </div>
-
-                    <div class="col-md-4 mb-3">
-                        <label class="form-label">Salary Range</label>
-                        <input asp-for="Input.SalaryRange" class="form-control" placeholder="$120,000 - $160,000" />
-                    </div>
-                </div>
-
-                <div class="mb-3">
-                    <label class="form-label">Posted Date</label>
-                    <input asp-for="Input.PostedDate" class="form-control" type="date" />
-                </div>
-
-                <button type="submit" class="btn btn-custom">Submit Job</button>
-            </form>
-
-            @if (TempData["Success"] != null)
-            {
-                <div class="alert alert-success mt-3">@TempData["Success"]</div>
-            }
-        </div>
-    </div>
-</body>
-</html>
