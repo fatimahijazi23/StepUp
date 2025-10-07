@@ -5,7 +5,7 @@ namespace aspteamWeb.Pages.JobSeeker
 {
     public class ProfileModel : PageModel
     {
-        // Displayed profile data
+        // Displayed profile data 
         public string UserName { get; set; } 
         public string Email { get; set; } 
         public string? About { get; set; } = null;
