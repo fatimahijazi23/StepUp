@@ -5,7 +5,7 @@ using System.Net.Http.Json;
 
 namespace aspteamWeb.Pages.JobSeeker
 {
-
+ 
 
         public class JobSeekerDashboardModel : PageModel
         {
