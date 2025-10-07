@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace aspteamWeb.Pages.JobSeeker
 {
-
+ 
     namespace aspteamWeb.Pages.JobSeeker
     {
 
