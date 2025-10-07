@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace aspteamWeb.Pages.JobSeeker
-{
+{ 
     public class ResumeTestModel : PageModel
     {
         [BindProperty]
