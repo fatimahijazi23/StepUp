@@ -1,20 +1,80 @@
 ﻿@page
-@model aspteamWeb.Pages.Company.ComanyDashboardModel
+@model aspteamWeb.Pages.Company.CompanyDashboardModel
 @{
     ViewData["Title"] = "Company Dashboard";
 }
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - StepUp</title>
 
-    <!-- Bootstrap -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Animate.css -->
+<!-- Navbar -->
+<nav class="navbar navbar-expand-lg navbar-dark">
+    <div class="container">
+        <a class="navbar-brand fw-bold" href="#">StepUp</a>
+        <div class="collapse navbar-collapse">
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item"><a class="nav-link" asp-page="/Company/CompanyDashboard">Dashboard</a></li>
+                <li class="nav-item"><a class="nav-link" asp-page="/Company/Profile">Profile</a></li>
+                <li class="nav-item"><a class="nav-link" asp-page="/Company/History">History</a></li>
+                <li class="nav-item"><a class="nav-link" asp-page="/Logout">Logout</a></li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<!-- Dashboard Header -->
+<div class="container">
+    <div class="dashboard-header animate__animated animate__fadeInDown text-center">
+        <h1 class="fw-bold text-dark">Company Dashboard</h1>
+        <a asp-page="/Company/CompanyForm" class="btn btn-primary mt-3">
+            <i class="bi bi-plus-circle"></i> Create New Job
+        </a>
+    </div>
+
+    <!-- Search -->
+    <div class="search-box animate__animated animate__fadeIn">
+        <input type="text" class="form-control form-control-lg shadow-sm" placeholder="Search your job postings..." />
+    </div>
+
+    <!-- Job Cards -->
+    <div class="mt-4">
+        @if (Model.Jobs == null || !Model.Jobs.Any())
+        {
+            <div class="alert alert-info text-center">No job postings yet. Create your first one!</div>
+        }
+        else
+        {
+            @foreach (var job in Model.Jobs)
+            {
+                <div class="card job-card mb-4 border-0">
+                    <div class="card-body d-flex justify-content-between align-items-start">
+                        <div>
+                            <h5 class="fw-semibold">@job.Title</h5>
+                            <p class="text-muted mb-1">@job.Location • @job.Type</p>
+                            <small class="text-muted">
+                                <i class="bi bi-people"></i> @job.ApplicantCount applicant@(job.ApplicantCount != 1 ? "s" : "")
+                                &nbsp;|&nbsp;
+                                <i class="bi bi-calendar-event"></i> Posted @((DateTime.Now - job.PostedAt).Days) day@( (DateTime.Now - job.PostedAt).Days == 1 ? "" : "s") ago
+                            </small>
+
+                            <div class="mt-3">
+                                <a asp-page="/JobSeeker/ViewJob" asp-route-id="@job.Id" class="btn btn-primary btn-sm me-2">View Details</a>
+                                <a class="btn btn-outline-primary btn-sm me-2">View Applicants (@job.ApplicantCount)</a>
+                                <button class="btn btn-outline-secondary btn-sm">Close Job</button>
+                            </div>
+                        </div>
+
+                        <div>
+                            <span class="badge bg-success bg-opacity-25 text-success px-3 py-2">Active</span>
+                        </div>
+                    </div>
+                </div>
+            }
+        }
+    </div>
+</div>
+
+@section Styles {
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
-
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" />
     <style>
         body {
             background-color: #f7faff;
@@ -33,18 +93,16 @@
         .dashboard-header {
             margin: 40px 0 20px;
             text-align: center;
-            animation: fadeInDown 1s;
         }
 
         .search-box {
             margin: 20px auto;
             max-width: 700px;
-            animation: fadeIn 1.2s;
         }
 
         .job-card {
             border-radius: 12px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
             transition: transform 0.2s ease-in-out;
         }
 
@@ -60,40 +118,8 @@
             text-align: center;
         }
     </style>
-</head>
-<body>
+}
 
-    <!-- Navbar -->
-    <nav class="navbar navbar-expand-lg navbar-dark">
-        <div class="container">
-            <a class="navbar-brand fw-bold" href="#">StepUp</a>
-            <div class="collapse navbar-collapse">
-                <ul class="navbar-nav ms-auto">
-                    <li class="nav-item"><a class="nav-link" asp-page="/CompanyDashboard">Dashboard</a></li>
-                    <li class="nav-item"><a class="nav-link" asp-page="/Profile">Profile</a></li>
-                    <li class="nav-item"><a class="nav-link" asp-page="/History">History</a></li>
-                    <li class="nav-item"><a class="nav-link" asp-page="/Logout">Logout</a></li>
-                </ul>
-            </div>
-        </div>
-    </nav>
-
-    <!-- Dashboard Header -->
-    <div class="container">
-        <div class="dashboard-header animate__animated animate__fadeInDown">
-            <h1 class="fw-bold text-dark">Company Dashboard</h1>
-            <button class="btn btn-primary mt-3"><i class="bi bi-plus-circle"></i> Create New Job</button>
-        </div>
-
-        <!-- Search -->
-        <div class="search-box animate__animated animate__fadeIn">
-            <input type="text" class="form-control form-control-lg shadow-sm" placeholder="Search your job postings..." />
-        </div>
-
-     
-
-    <!-- Bootstrap + Icons -->
+@section Scripts {
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
-</body>
-</html>
+}

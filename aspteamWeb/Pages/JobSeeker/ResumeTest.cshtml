@@ -1,0 +1,96 @@
+@page
+@model aspteamWeb.Pages.JobSeeker.ResumeTestModel
+@{
+    ViewData["Title"] = "Test Your Resume";
+}
+
+<div class="container">
+    <div class="resume-card">
+        <h3 class="text-center mb-4">Test Your Resume</h3>
+
+        <form method="post" enctype="multipart/form-data">
+            <!-- Upload Resume -->
+            <div class="mb-4">
+                <label class="form-label fw-bold">Upload Resume (PDF/DOCX)</label>
+                <div class="upload-box" onclick="document.getElementById('resumeFile').click();">
+                    <p>📄 Choose file or drag and drop</p>
+                </div>
+                <input id="resumeFile" asp-for="ResumeFile" type="file" class="form-control d-none" />
+            </div>
+
+            <!-- Job Description -->
+            <div class="mb-3">
+                <label class="form-label fw-bold">Job Description</label>
+                <textarea asp-for="JobDescription" class="form-control" rows="6"
+                          placeholder="Paste the job description here..."></textarea>
+            </div>
+
+            <!-- Submit -->
+            <button type="submit" class="btn btn-custom">Analyze Resume</button>
+        </form>
+
+        @if (Model.ResultMessage != null)
+        {
+            <div class="alert alert-info mt-3">@Model.ResultMessage</div>
+        }
+    </div>
+</div>
+
+@section Styles {
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <style>
+        body {
+            background-color: #f4f8fc;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .resume-card {
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            padding: 25px;
+            margin-top: 40px;
+        }
+
+        .upload-box {
+            border: 2px dashed #0d6efd;
+            border-radius: 8px;
+            text-align: center;
+            padding: 40px 20px;
+            color: #0d6efd;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .upload-box:hover {
+            background-color: #e9f2ff;
+        }
+
+        .btn-custom {
+            background-color: #0d6efd;
+            color: #fff;
+            font-weight: 500;
+            width: 100%;
+        }
+    </style>
+}
+
+@section Scripts {
+    <script>
+        document.querySelector('.upload-box').addEventListener('dragover', function (e) {
+            e.preventDefault();
+            this.style.backgroundColor = '#e9f2ff';
+        });
+
+        document.querySelector('.upload-box').addEventListener('dragleave', function () {
+            this.style.backgroundColor = '';
+        });
+
+        document.querySelector('.upload-box').addEventListener('drop', function (e) {
+            e.preventDefault();
+            this.style.backgroundColor = '';
+            const fileInput = document.getElementById('resumeFile');
+            fileInput.files = e.dataTransfer.files;
+        });
+    </script>
+}

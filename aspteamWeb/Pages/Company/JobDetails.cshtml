@@ -1,0 +1,145 @@
+﻿@page "{id:int}"
+@model aspteamWeb.Pages.Company.JobDetailsModel
+@{
+    ViewData["Title"] = Model.Job?.JobTitle ?? "Job Details";
+}
+
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="job-details-container">
+                @if (Model.Job == null)
+                {
+                    <div class="alert alert-danger">Job not found.</div>
+                }
+                else
+                {
+                    <!-- Job Header -->
+                    <div class="job-header mb-4">
+                        <h1 class="job-title">@Model.Job.JobTitle</h1>
+                        <div class="job-company">@Model.Job.CompanyName</div>
+                    </div>
+
+                    <!-- Job Meta Information -->
+                    <div class="job-meta mb-4">
+                        <span class="meta-item">
+                            <i class="bi bi-geo-alt"></i> @Model.Job.Location
+                        </span>
+                        <span class="meta-item">
+                            <i class="bi bi-briefcase"></i> @Model.Job.JobType
+                        </span>
+                        <span class="meta-item">
+                            <i class="bi bi-building"></i> @Model.Job.Industry
+                        </span>
+                        <span class="meta-item">
+                            <i class="bi bi-clock"></i> Posted @Model.Job.PostedDaysAgo days ago
+                        </span>
+                        <span class="meta-item">
+                            <i class="bi bi-currency-dollar"></i> @Model.Job.SalaryRange
+                        </span>
+                    </div>
+
+                    <!-- Job Description Section -->
+                    <div class="job-section mb-4">
+                        <h3 class="section-title">Job Description</h3>
+                        <p class="section-content">@Model.Job.JobDescription</p>
+                    </div>
+
+                    <!-- Requirements Section -->
+                    <div class="job-section mb-4">
+                        <h3 class="section-title">Requirements</h3>
+                        <p class="section-content">@Model.Job.Requirements</p>
+                    </div>
+
+                    <!-- Benefits Section -->
+                    <div class="job-section mb-4">
+                        <h3 class="section-title">Benefits</h3>
+                        <p class="section-content">@Model.Job.Benefits</p>
+                    </div>
+
+                    <!-- View Applicants Button -->
+                    <div class="mt-4">
+                        <a asp-page="/Applicants/Index" asp-route-jobId="@Model.Job.Id" class="btn btn-primary btn-applicants">
+                            <i class="bi bi-people"></i> View Applicants (@Model.ApplicantCount)
+                        </a>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+
+<style>
+    .job-details-container {
+        background: #fff;
+        padding: 2rem;
+        border-radius: 8px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+
+    .job-title {
+        font-size: 2rem;
+        font-weight: 700;
+        color: #1e293b;
+        margin-bottom: 0.5rem;
+    }
+
+    .job-company {
+        color: #2563eb;
+        font-size: 1rem;
+        font-weight: 500;
+        margin-bottom: 1rem;
+    }
+
+    .job-meta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1.5rem;
+        padding: 1rem 0;
+        border-top: 1px solid #e2e8f0;
+        border-bottom: 1px solid #e2e8f0;
+    }
+
+    .meta-item {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: #64748b;
+        font-size: 0.9rem;
+    }
+
+    .job-section {
+        margin-top: 2rem;
+    }
+
+    .section-title {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #1e293b;
+        margin-bottom: 1rem;
+    }
+
+    .section-content {
+        color: #475569;
+        line-height: 1.7;
+        font-size: 0.95rem;
+        white-space: pre-line;
+    }
+
+    .btn-applicants {
+        background-color: #2563eb;
+        border-color: #2563eb;
+        padding: 0.75rem 1.5rem;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+        .btn-applicants:hover {
+            background-color: #1d4ed8;
+            border-color: #1d4ed8;
+        }
+</style>

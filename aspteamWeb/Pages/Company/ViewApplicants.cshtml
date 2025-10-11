@@ -1,0 +1,99 @@
+﻿@page
+@model ViewApplicantsModel
+@{
+    ViewData["Title"] = "Applicants for " + Model.JobTitle;
+}
+
+<div class="container mt-4">
+    <div class="applicants-container">
+        <!-- Header -->
+        <div class="applicants-header mb-4">
+            <h1 class="page-title">Applicants for @Model.JobTitle</h1>
+            <p class="applicant-count">@Model.TotalApplicants total applicants</p>
+        </div>
+
+        <!-- Filters -->
+        <form method="get" class="filters-section mb-4">
+            <div class="row g-3 align-items-center">
+                <div class="col-md-4">
+                    <select name="fitStatus" class="form-select" onchange="this.form.submit()">
+                        <option value="">All Fit Status</option>
+                        <option value="high" @@(Model.FitStatusFilter == "high" ? "selected" : "")>High Fit</option>
+                        <option value="medium" @@(Model.FitStatusFilter == "medium" ? "selected" : "")>Medium Fit</option>
+                        <option value="low" @@(Model.FitStatusFilter == "low" ? "selected" : "")>Low Fit</option>
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <select name="status" class="form-select" onchange="this.form.submit()">
+                        <option value="">All Status</option>
+                        <option value="In-progress" @@(Model.StatusFilter == "In-progress" ? "selected" : "")>In-progress</option>
+                        <option value="Reviewed" @@(Model.StatusFilter == "Reviewed" ? "selected" : "")>Reviewed</option>
+                        <option value="Accepted" @@(Model.StatusFilter == "Accepted" ? "selected" : "")>Accepted</option>
+                        <option value="Rejected" @@(Model.StatusFilter == "Rejected" ? "selected" : "")>Rejected</option>
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <button type="button" class="btn btn-clear"
+                            onclick="window.location.href='@Url.Page("/ViewApplicants", new { jobId = Model.JobId })'">
+                        Clear Filters
+                    </button>
+                </div>
+            </div>
+        </form>
+
+        <!-- Applicants List -->
+        <div class="applicants-list">
+            @foreach (var applicant in Model.Applicants)
+            {
+                <div class="applicant-card">
+                    <div class="applicant-info">
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <div>
+                                <h3 class="applicant-name">@applicant.Name</h3>
+                                <p class="applied-date">Applied @applicant.AppliedDaysAgo day@(applicant.AppliedDaysAgo > 1 ? "s" : "") ago</p>
+                            </div>
+                            <div class="fit-score-badge" style="background-color: @applicant.FitScoreColor">
+                                @applicant.FitScore/10
+                                <div class="fit-score-label">Fit Score</div>
+                            </div>
+                        </div>
+
+                        <div class="applicant-actions">
+                            <div class="row g-3">
+                                <div class="col-md-3">
+                                    <form method="post" asp-page-handler="UpdateStatus">
+                                        <input type="hidden" name="applicantId" value="@applicant.Id" />
+                                        <input type="hidden" name="jobId" value="@Model.JobId" />
+                                        <select name="status" class="form-select status-select" onchange="this.form.submit()">
+                                            <option value="In-progress" @@(applicant.Status == "In-progress" ? "selected" : "")>In-progress</option>
+                                            <option value="Reviewed" @@(applicant.Status == "Reviewed" ? "selected" : "")>Reviewed</option>
+                                            <option value="Accepted" @@(applicant.Status == "Accepted" ? "selected" : "")>Accepted</option>
+                                            <option value="Rejected" @@(applicant.Status == "Rejected" ? "selected" : "")>Rejected</option>
+                                        </select>
+                                    </form>
+                                </div>
+                                <div class="col-md-9 d-flex gap-2 justify-content-end">
+                                    <a asp-page="/ApplicantDetails" asp-route-id="@applicant.Id" class="btn btn-view-details">
+                                        View Details
+                                    </a>
+                                    <a href="@applicant.CvUrl" class="btn btn-download" download>
+                                        <i class="bi bi-download"></i> Download CV
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+
+        @if (!Model.Applicants.Any())
+        {
+            <div class="no-applicants">
+                <p>No applicants found matching your filters.</p>
+            </div>
+        }
+    </div>
+</div>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">

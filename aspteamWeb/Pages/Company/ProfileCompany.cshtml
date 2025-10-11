@@ -1,0 +1,221 @@
+﻿@page
+@model ProfileCompanyModel
+@{
+    ViewData["Title"] = "Company Profile";
+}
+
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-6 col-md-8">
+
+            <!-- Success Message -->
+            @if (!string.IsNullOrEmpty(Model.SuccessMessage))
+            {
+                <div class="alert alert-success text-center">
+                    @Model.SuccessMessage
+                </div>
+            }
+
+            <!-- Company Header -->
+            <div class="company-header text-center mb-4">
+                <div class="company-avatar">
+                    @(Model.Company != null && !string.IsNullOrEmpty(Model.Company.Name)
+                                        ? Model.Company.Name.Substring(0, 1).ToUpper()
+                                        : "")
+                </div>
+                <h2 class="company-name mt-3">@Model.Company?.Name</h2>
+                <div class="company-details">
+                    <p class="detail-item"><strong>Email:</strong> @Model.Company?.Email</p>
+                    <p class="detail-item"><strong>Industry:</strong> @Model.Company?.Industry</p>
+                    <p class="detail-item"><strong>Company Size:</strong> @Model.Company?.CompanySize</p>
+                    <p class="detail-item"><strong>About:</strong></p>
+                    <p class="detail-item">@Model.Company?.About</p>
+                </div>
+                <div class="followers-badge">
+                    <span class="followers-count">@Model.FollowersCount</span>
+                    <span class="followers-label">Followers</span>
+                </div>
+            </div>
+
+            <!-- Edit Profile Form -->
+            <div class="edit-profile-card">
+                <h3 class="form-title">Edit Company Profile</h3>
+
+                <form method="post">
+                    <div class="mb-3">
+                        <label asp-for="Company.Name" class="form-label"></label>
+                        <input asp-for="Company.Name" class="form-control" />
+                        <span asp-validation-for="Company.Name" class="text-danger"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Company.Industry" class="form-label"></label>
+                        <input asp-for="Company.Industry" class="form-control" />
+                        <span asp-validation-for="Company.Industry" class="text-danger"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Company.Email" class="form-label"></label>
+                        <input asp-for="Company.Email" class="form-control" type="email" />
+                        <span asp-validation-for="Company.Email" class="text-danger"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Company.CompanySize" class="form-label"></label>
+                        <input asp-for="Company.CompanySize" class="form-control" />
+                        <span asp-validation-for="Company.CompanySize" class="text-danger"></span>
+                    </div>
+
+                    <div class="mb-4">
+                        <label asp-for="Company.About" class="form-label"></label>
+                        <textarea asp-for="Company.About" class="form-control" rows="4" placeholder="Write something about your company"></textarea>
+                        <span asp-validation-for="Company.About" class="text-danger"></span>
+                    </div>
+
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary btn-save">Save Changes</button>
+                    </div>
+                </form>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
+
+<style>
+    .company-header {
+        background: #fff;
+        padding: 2rem;
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        text-align: center;
+    }
+
+    .company-avatar {
+        width: 80px;
+        height: 80px;
+        background: #2563eb;
+        color: white;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin: 0 auto;
+    }
+
+    .company-name {
+        font-size: 2rem;
+        font-weight: 700;
+        color: #1e293b;
+        margin-bottom: 1rem;
+    }
+
+    .company-details {
+        text-align: left;
+        max-width: 400px;
+        margin: 1.5rem auto;
+    }
+
+    .detail-item {
+        color: #475569;
+        font-size: 0.95rem;
+        margin-bottom: 0.5rem;
+    }
+
+        .detail-item strong {
+            color: #1e293b;
+        }
+
+    .followers-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        background: #2563eb;
+        color: white;
+        padding: 0.5rem 1rem;
+        border-radius: 50px;
+        margin-top: 1rem;
+    }
+
+    .followers-count {
+        font-weight: 700;
+        font-size: 1.1rem;
+    }
+
+    .followers-label {
+        font-size: 0.9rem;
+    }
+
+    .edit-profile-card {
+        background: #fff;
+        padding: 2rem;
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        margin-top: 2rem;
+    }
+
+    .form-title {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #1e293b;
+        margin-bottom: 1.5rem;
+    }
+
+    .form-label {
+        color: #1e293b;
+        font-weight: 600;
+        font-size: 0.95rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .form-control {
+        border: 1px solid #e2e8f0;
+        padding: 0.75rem;
+        border-radius: 6px;
+        font-size: 0.95rem;
+    }
+
+        .form-control:focus {
+            border-color: #2563eb;
+            box-shadow: 0 0 0 0.2rem rgba(37, 99, 235, 0.15);
+        }
+
+    .btn-save {
+        background-color: #2563eb;
+        border-color: #2563eb;
+        padding: 0.875rem;
+        font-weight: 600;
+        font-size: 1rem;
+        border-radius: 6px;
+    }
+
+        .btn-save:hover {
+            background-color: #1d4ed8;
+            border-color: #1d4ed8;
+        }
+
+    @@media (max-width: 768px) {
+        .company-header, .edit-profile-card
+
+    {
+        padding: 1.5rem;
+    }
+
+    .company-name {
+        font-size: 1.5rem;
+    }
+
+    .company-avatar {
+        width: 60px;
+        height: 60px;
+        font-size: 2rem;
+    }
+
+    }
+</style>

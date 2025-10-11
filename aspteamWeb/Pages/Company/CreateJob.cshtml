@@ -1,0 +1,134 @@
+﻿@page
+@model aspteamWeb.Pages.Company.CreateJobModel
+@{
+    ViewData["Title"] = "Create New Job";
+}
+
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-8 mx-auto">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h4 class="mb-0">Create New Job</h4>
+                    <a asp-page="/Company/CompanyDashboard" class="btn-close" aria-label="Close"></a>
+                </div>
+                <div class="card-body">
+                    <form method="post">
+                        <div class="mb-3">
+                            <label asp-for="Input.JobTitle" class="form-label fw-semibold">Job Title</label>
+                            <input asp-for="Input.JobTitle" class="form-control" />
+                            <span asp-validation-for="Input.JobTitle" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Input.Location" class="form-label fw-semibold">Location</label>
+                            <input asp-for="Input.Location" class="form-control" />
+                            <span asp-validation-for="Input.Location" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Input.JobType" class="form-label fw-semibold">Job Type</label>
+                            <select asp-for="Input.JobType" class="form-select">
+                                <option value="">Select Type</option>
+                                <option>Full-Time</option>
+                                <option>Part-Time</option>
+                                <option>Contract</option>
+                                <option>Internship</option>
+                            </select>
+                            <span asp-validation-for="Input.JobType" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Input.Industry" class="form-label fw-semibold">Industry</label>
+                            <select asp-for="Input.Industry" class="form-select">
+                                <option value="">Select Industry</option>
+                                <option>Technology</option>
+                                <option>Healthcare</option>
+                                <option>Finance</option>
+                                <option>Education</option>
+                                <option>Retail</option>
+                            </select>
+                            <span asp-validation-for="Input.Industry" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Input.JobDescription" class="form-label fw-semibold">Job Description</label>
+                            <textarea asp-for="Input.JobDescription" class="form-control" rows="4"></textarea>
+                            <span asp-validation-for="Input.JobDescription" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Input.Requirements" class="form-label fw-semibold">Requirements</label>
+                            <textarea asp-for="Input.Requirements" class="form-control" rows="4"></textarea>
+                            <span asp-validation-for="Input.Requirements" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Input.Benefits" class="form-label fw-semibold">Benefits</label>
+                            <textarea asp-for="Input.Benefits" class="form-control" rows="4"></textarea>
+                            <span asp-validation-for="Input.Benefits" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-4">
+                            <label asp-for="Input.SalaryRange" class="form-label fw-semibold">Salary Range</label>
+                            <input asp-for="Input.SalaryRange" class="form-control" placeholder="e.g., $50,000 - $70,000" />
+                            <span asp-validation-for="Input.SalaryRange" class="text-danger"></span>
+                        </div>
+
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary btn-lg">Create Job</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
+
+@section Styles {
+    <style>
+        .btn-primary {
+            background-color: #2563eb;
+            border-color: #2563eb;
+        }
+
+            .btn-primary:hover {
+                background-color: #1d4ed8;
+                border-color: #1d4ed8;
+            }
+
+        .form-label {
+            color: #1e293b;
+            font-size: 0.95rem;
+        }
+
+        .form-control, .form-select {
+            border: 1px solid #e2e8f0;
+            padding: 0.625rem 0.75rem;
+        }
+
+            .form-control:focus, .form-select:focus {
+                border-color: #2563eb;
+                box-shadow: 0 0 0 0.2rem rgba(37, 99, 235, 0.15);
+            }
+
+        .card {
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .card-header {
+            background-color: #fff;
+            border-bottom: 1px solid #e2e8f0;
+            padding: 1.25rem 1.5rem;
+        }
+
+        .card-body {
+            padding: 1.5rem;
+        }
+    </style>
+}

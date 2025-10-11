@@ -1,15 +1,15 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
-namespace aspteamWeb.Pages.Company
+namespace aspteamWeb.Pages.JobSeeker
 {
-    public class CompanyDashboardModel : PageModel
+    public class CompanyFormModel : PageModel
     {
         public List<JobPosting> Jobs { get; set; } = new();
 
         public void OnGet()
         {
-            // In a real app, replace this with database data
+            // In real scenario, replace this with database fetching (e.g. from EF Core)
             Jobs = new List<JobPosting>
             {
                 new JobPosting
@@ -25,10 +25,10 @@ namespace aspteamWeb.Pages.Company
                 new JobPosting
                 {
                     Id = 2,
-                    Title = "UI/UX Designer",
+                    Title = "Frontend Developer",
                     Location = "New York, NY",
-                    Type = "Contract",
-                    ApplicantCount = 4,
+                    Type = "Part-time",
+                    ApplicantCount = 5,
                     PostedAt = DateTime.Now.AddDays(-3),
                     Status = "Active"
                 }
