@@ -85,13 +85,18 @@
     <form method="post">
         <div class="mb-3">
             <label class="form-label">Email</label>
-            <input type="email" class="form-control" required />
+            <input asp-for="Email" type="email" class="form-control" required />
         </div>
         <div class="mb-3">
             <label class="form-label">Password</label>
-            <input type="password" class="form-control" required />
+            <input asp-for="Password" type="password" class="form-control" required />
         </div>
+
+        @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+        {
+            <div class="alert alert-danger">@Model.ErrorMessage</div>
+        }
+
         <button type="submit" class="btn btn-custom">Login</button>
-       
     </form>
 </div>

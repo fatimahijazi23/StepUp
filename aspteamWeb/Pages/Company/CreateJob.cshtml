@@ -89,7 +89,6 @@
     <partial name="_ValidationScriptsPartial" />
 }
 
-@section Styles {
     <style>
         .btn-primary {
             background-color: #2563eb;
@@ -126,6 +125,10 @@
             border-bottom: 1px solid #e2e8f0;
             padding: 1.25rem 1.5rem;
         }
+        @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+{
+    <div class="alert alert-danger mx-3 mt-3">@Model.ErrorMessage</div>
+}
 
         .card-body {
             padding: 1.5rem;
