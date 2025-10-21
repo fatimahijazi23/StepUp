@@ -6,6 +6,7 @@ namespace aspteamAPI.DTOs
     {
         [Required]
         public string Description { get; set; } = string.Empty;
+        public string Title { get; set; }
         public string? Requirements { get; set; }
         public string? Location { get; set; }
         public Industry? Industry { get; set; }

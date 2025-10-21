@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Data.SqlClient;
 using System.Security.Cryptography;
@@ -36,8 +36,12 @@ namespace aspteamWeb.Pages.Company
                 {
                     connection.Open();
 
-                    // Role = 1 for Company (0 = JobSeeker, 1 = Company)
-                    string sql = "SELECT Id, PasswordHash FROM Users WHERE Email = @Email AND Role = 1";
+                    // Join Users and CompanyAccounts to get the Company ID
+                    string sql = @"
+                        SELECT u.Id as UserId, u.PasswordHash, c.Id as CompanyId, c.CompanyName 
+                        FROM Users u
+                        INNER JOIN CompanyAccounts c ON u.Id = c.UserId
+                        WHERE u.Email = @Email AND u.Role = 1";
 
                     using (SqlCommand command = new SqlCommand(sql, connection))
                     {
@@ -52,8 +56,18 @@ namespace aspteamWeb.Pages.Company
                                 // Verify password using the SAME method as your API
                                 if (VerifyPassword(Password, storedHash))
                                 {
+                                    // Store both User ID and Company ID
+                                    int userId = (int)reader["UserId"];
+                                    int companyId = (int)reader["CompanyId"];
+                                    string companyName = reader["CompanyName"].ToString();
+
+                                    // Store in session
                                     HttpContext.Session.SetString("UserEmail", Email);
-                                    HttpContext.Session.SetInt32("UserId", (int)reader["Id"]);
+                                    HttpContext.Session.SetInt32("UserId", userId);
+                                    HttpContext.Session.SetInt32("CompanyId", companyId); // ✅ THIS IS THE KEY!
+                                    HttpContext.Session.SetString("CompanyName", companyName);
+                                    HttpContext.Session.SetString("UserType", "Company");
+
                                     return RedirectToPage("/Company/CompanyDashboard");
                                 }
                                 else
@@ -64,7 +78,7 @@ namespace aspteamWeb.Pages.Company
                             }
                             else
                             {
-                                ErrorMessage = "Invalid email or password. Please check your credentials.";
+                                ErrorMessage = "Invalid email or password. This account may not have a company profile.";
                                 return Page();
                             }
                         }

@@ -2,220 +2,289 @@
 @model ProfileCompanyModel
 @{
     ViewData["Title"] = "Company Profile";
+    Layout = null;
 }
 
-<div class="container mt-4">
-    <div class="row justify-content-center">
-        <div class="col-lg-6 col-md-8">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 
-            <!-- Success Message -->
+<style>
+    body {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    .profile-container {
+        max-width: 800px;
+        margin: 50px auto;
+        background: #fff;
+        border-radius: 20px;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+        overflow: hidden;
+    }
+
+    .profile-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 40px;
+        text-align: center;
+        position: relative;
+    }
+
+    .profile-avatar {
+        width: 120px;
+        height: 120px;
+        background: white;
+        border-radius: 50%;
+        margin: 0 auto 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 48px;
+        color: #667eea;
+        border: 5px solid rgba(255,255,255,0.3);
+    }
+
+    .profile-header h2 {
+        margin: 0;
+        font-size: 28px;
+        font-weight: bold;
+    }
+
+    .profile-header p {
+        margin: 10px 0 0 0;
+        opacity: 0.9;
+    }
+
+    .profile-body {
+        padding: 40px;
+    }
+
+    .form-label {
+        font-weight: 600;
+        color: #333;
+        margin-bottom: 8px;
+    }
+
+    .form-control, .form-select {
+        border-radius: 10px;
+        border: 2px solid #e0e0e0;
+        padding: 12px 15px;
+        transition: all 0.3s;
+    }
+
+        .form-control:focus, .form-select:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+        }
+
+    .btn-save {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border: none;
+        color: white;
+        padding: 12px 40px;
+        border-radius: 10px;
+        font-weight: 600;
+        transition: all 0.3s;
+        margin-right: 10px;
+    }
+
+        .btn-save:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+        }
+
+    .btn-cancel {
+        background: #f5f5f5;
+        border: 2px solid #e0e0e0;
+        color: #666;
+        padding: 12px 40px;
+        border-radius: 10px;
+        font-weight: 600;
+        transition: all 0.3s;
+    }
+
+        .btn-cancel:hover {
+            background: #e0e0e0;
+        }
+
+    .alert {
+        border-radius: 10px;
+        border: none;
+    }
+
+    .stats-row {
+        display: flex;
+        justify-content: space-around;
+        padding: 20px 0;
+        border-top: 1px solid #e0e0e0;
+        margin-top: 20px;
+    }
+
+    .stat-item {
+        text-align: center;
+    }
+
+    .stat-number {
+        font-size: 24px;
+        font-weight: bold;
+        color: #667eea;
+    }
+
+    .stat-label {
+        color: #666;
+        font-size: 14px;
+    }
+
+    textarea.form-control {
+        min-height: 120px;
+        resize: vertical;
+    }
+
+    .back-link {
+        display: inline-block;
+        margin: 20px 0;
+        color: white;
+        text-decoration: none;
+        padding: 10px 20px;
+        background: rgba(255,255,255,0.2);
+        border-radius: 8px;
+        transition: all 0.3s;
+    }
+
+        .back-link:hover {
+            background: rgba(255,255,255,0.3);
+            color: white;
+        }
+</style>
+
+<div class="container">
+    <a href="/Company/CompanyDashboard" class="back-link">
+        <i class="fas fa-arrow-left"></i> Back to Dashboard
+    </a>
+
+    <div class="profile-container">
+        <div class="profile-header">
+            <div class="profile-avatar">
+                <i class="fas fa-building"></i>
+            </div>
+            <h2>@Model.Company.Name</h2>
+            <p><i class="fas fa-envelope"></i> @Model.Company.Email</p>
+        </div>
+
+        <div class="profile-body">
             @if (!string.IsNullOrEmpty(Model.SuccessMessage))
             {
-                <div class="alert alert-success text-center">
-                    @Model.SuccessMessage
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    <i class="fas fa-check-circle"></i> @Model.SuccessMessage
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                 </div>
             }
 
-            <!-- Company Header -->
-            <div class="company-header text-center mb-4">
-                <div class="company-avatar">
-                    @(Model.Company != null && !string.IsNullOrEmpty(Model.Company.Name)
-                                        ? Model.Company.Name.Substring(0, 1).ToUpper()
-                                        : "")
+            @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+            {
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <i class="fas fa-exclamation-circle"></i> @Model.ErrorMessage
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                 </div>
-                <h2 class="company-name mt-3">@Model.Company?.Name</h2>
-                <div class="company-details">
-                    <p class="detail-item"><strong>Email:</strong> @Model.Company?.Email</p>
-                    <p class="detail-item"><strong>Industry:</strong> @Model.Company?.Industry</p>
-                    <p class="detail-item"><strong>Company Size:</strong> @Model.Company?.CompanySize</p>
-                    <p class="detail-item"><strong>About:</strong></p>
-                    <p class="detail-item">@Model.Company?.About</p>
-                </div>
-                <div class="followers-badge">
-                    <span class="followers-count">@Model.FollowersCount</span>
-                    <span class="followers-label">Followers</span>
-                </div>
-            </div>
+            }
 
-            <!-- Edit Profile Form -->
-            <div class="edit-profile-card">
-                <h3 class="form-title">Edit Company Profile</h3>
+            <form method="post">
+                <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
 
-                <form method="post">
-                    <div class="mb-3">
-                        <label asp-for="Company.Name" class="form-label"></label>
-                        <input asp-for="Company.Name" class="form-control" />
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="Company.Name" class="form-label">
+                            <i class="fas fa-building"></i> Company Name
+                        </label>
+                        <input asp-for="Company.Name" class="form-control" placeholder="Enter company name" />
                         <span asp-validation-for="Company.Name" class="text-danger"></span>
                     </div>
 
-                    <div class="mb-3">
-                        <label asp-for="Company.Industry" class="form-label"></label>
-                        <input asp-for="Company.Industry" class="form-control" />
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="Company.Email" class="form-label">
+                            <i class="fas fa-envelope"></i> Email
+                        </label>
+                        <input asp-for="Company.Email" type="email" class="form-control" placeholder="company@email.com" />
+                        <span asp-validation-for="Company.Email" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="Company.Industry" class="form-label">
+                            <i class="fas fa-industry"></i> Industry
+                        </label>
+                        <select asp-for="Company.Industry" class="form-select">
+                            <option value="">Select Industry</option>
+                            <option value="Technology">Technology</option>
+                            <option value="Healthcare">Healthcare</option>
+                            <option value="Finance">Finance</option>
+                            <option value="Education">Education</option>
+                            <option value="Manufacturing">Manufacturing</option>
+                            <option value="Retail">Retail</option>
+                            <option value="Consulting">Consulting</option>
+                            <option value="RealEstate">Real Estate</option>
+                            <option value="Other">Other</option>
+                        </select>
                         <span asp-validation-for="Company.Industry" class="text-danger"></span>
                     </div>
 
-                    <div class="mb-3">
-                        <label asp-for="Company.Email" class="form-label"></label>
-                        <input asp-for="Company.Email" class="form-control" type="email" />
-                        <span asp-validation-for="Company.Email" class="text-danger"></span>
-                    </div>
-
-                    <div class="mb-3">
-                        <label asp-for="Company.CompanySize" class="form-label"></label>
-                        <input asp-for="Company.CompanySize" class="form-control" />
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="Company.CompanySize" class="form-label">
+                            <i class="fas fa-users"></i> Company Size
+                        </label>
+                        <select asp-for="Company.CompanySize" class="form-select">
+                            <option value="">Select Size</option>
+                            <option value="1-10">1-10 employees</option>
+                            <option value="11-50">11-50 employees</option>
+                            <option value="51-200">51-200 employees</option>
+                            <option value="201-500">201-500 employees</option>
+                            <option value="500+">500+ employees</option>
+                        </select>
                         <span asp-validation-for="Company.CompanySize" class="text-danger"></span>
                     </div>
+                </div>
 
-                    <div class="mb-4">
-                        <label asp-for="Company.About" class="form-label"></label>
-                        <textarea asp-for="Company.About" class="form-control" rows="4" placeholder="Write something about your company"></textarea>
-                        <span asp-validation-for="Company.About" class="text-danger"></span>
-                    </div>
+                <div class="mb-3">
+                    <label asp-for="Company.About" class="form-label">
+                        <i class="fas fa-info-circle"></i> About Company
+                    </label>
+                    <textarea asp-for="Company.About" class="form-control"
+                              placeholder="Tell us about your company, mission, and values..."></textarea>
+                    <span asp-validation-for="Company.About" class="text-danger"></span>
+                </div>
 
-                    <div class="d-grid">
-                        <button type="submit" class="btn btn-primary btn-save">Save Changes</button>
-                    </div>
-                </form>
+                <div class="d-flex justify-content-end mt-4">
+                    <a href="/Company/CompanyDashboard" class="btn btn-cancel">
+                        <i class="fas fa-times"></i> Cancel
+                    </a>
+                    <button type="submit" class="btn btn-save">
+                        <i class="fas fa-save"></i> Save Changes
+                    </button>
+                </div>
+            </form>
+
+            <div class="stats-row">
+                <div class="stat-item">
+                    <div class="stat-number">@Model.FollowersCount</div>
+                    <div class="stat-label">Followers</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">0</div>
+                    <div class="stat-label">Active Jobs</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">0</div>
+                    <div class="stat-label">Applications</div>
+                </div>
             </div>
-
         </div>
     </div>
 </div>
 
-@section Scripts {
-    <partial name="_ValidationScriptsPartial" />
-}
-
-<style>
-    .company-header {
-        background: #fff;
-        padding: 2rem;
-        border-radius: 12px;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-        text-align: center;
-    }
-
-    .company-avatar {
-        width: 80px;
-        height: 80px;
-        background: #2563eb;
-        color: white;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 2.5rem;
-        font-weight: 700;
-        margin: 0 auto;
-    }
-
-    .company-name {
-        font-size: 2rem;
-        font-weight: 700;
-        color: #1e293b;
-        margin-bottom: 1rem;
-    }
-
-    .company-details {
-        text-align: left;
-        max-width: 400px;
-        margin: 1.5rem auto;
-    }
-
-    .detail-item {
-        color: #475569;
-        font-size: 0.95rem;
-        margin-bottom: 0.5rem;
-    }
-
-        .detail-item strong {
-            color: #1e293b;
-        }
-
-    .followers-badge {
-        display: inline-flex;
-        align-items: center;
-        gap: 0.5rem;
-        background: #2563eb;
-        color: white;
-        padding: 0.5rem 1rem;
-        border-radius: 50px;
-        margin-top: 1rem;
-    }
-
-    .followers-count {
-        font-weight: 700;
-        font-size: 1.1rem;
-    }
-
-    .followers-label {
-        font-size: 0.9rem;
-    }
-
-    .edit-profile-card {
-        background: #fff;
-        padding: 2rem;
-        border-radius: 12px;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-        margin-top: 2rem;
-    }
-
-    .form-title {
-        font-size: 1.5rem;
-        font-weight: 700;
-        color: #1e293b;
-        margin-bottom: 1.5rem;
-    }
-
-    .form-label {
-        color: #1e293b;
-        font-weight: 600;
-        font-size: 0.95rem;
-        margin-bottom: 0.5rem;
-    }
-
-    .form-control {
-        border: 1px solid #e2e8f0;
-        padding: 0.75rem;
-        border-radius: 6px;
-        font-size: 0.95rem;
-    }
-
-        .form-control:focus {
-            border-color: #2563eb;
-            box-shadow: 0 0 0 0.2rem rgba(37, 99, 235, 0.15);
-        }
-
-    .btn-save {
-        background-color: #2563eb;
-        border-color: #2563eb;
-        padding: 0.875rem;
-        font-weight: 600;
-        font-size: 1rem;
-        border-radius: 6px;
-    }
-
-        .btn-save:hover {
-            background-color: #1d4ed8;
-            border-color: #1d4ed8;
-        }
-
-    @@media (max-width: 768px) {
-        .company-header, .edit-profile-card
-
-    {
-        padding: 1.5rem;
-    }
-
-    .company-name {
-        font-size: 1.5rem;
-    }
-
-    .company-avatar {
-        width: 60px;
-        height: 60px;
-        font-size: 2rem;
-    }
-
-    }
-</style>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.3/jquery.validate.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validation-unobtrusive/3.2.12/jquery.validate.unobtrusive.min.js"></script>
