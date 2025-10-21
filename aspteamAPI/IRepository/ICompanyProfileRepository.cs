@@ -1,21 +1,19 @@
 ﻿using aspteamAPI.DTOs;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace aspteamAPI
 {
     public interface ICompanyProfileRepository
     {
-        //          GET /api/user/profile ✅
-        //          PUT /api/user/profile ✅
-        //          DELETE /api/user/account✅
-        //          POST /api/user/upload-avatar✅
-        //         
-        public Task<UpdateCompanyProfileDTO> UpdateCompanyProfile(UpdateCompanyProfileDTO dto);
+        // GET /api/CompanyProfiles/{id}
+        Task<UpdateCompanyProfileDTO> GetCompanyProfile(int companyId);
 
-        public Task<UpdateCompanyProfileDTO> GetCompanyProfile(int companyId);
+        // GET /api/CompanyProfiles/by-user/{userId} ✅ NEW
+        Task<UpdateCompanyProfileDTO> GetCompanyProfileByUserId(int userId);
 
-        public Task<CompanyAccount> DeleteCompanyAccount(int companyId);
+        // PATCH /api/CompanyProfiles/{id}
+        Task<UpdateCompanyProfileDTO> UpdateCompanyProfile(UpdateCompanyProfileDTO dto);
 
-
+        // DELETE /api/CompanyProfiles/{id}
+        Task<CompanyAccount> DeleteCompanyAccount(int companyId);
     }
 }

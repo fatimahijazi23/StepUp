@@ -1,12 +1,14 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using System.ComponentModel.DataAnnotations;
+using Microsoft.Data.SqlClient;
 
 namespace aspteamWeb.Pages.Company
 {
     public class RegisterModel : PageModel
     {
         private readonly HttpClient _httpClient;
+        private readonly string connectionString = "Server=DESKTOP-81J6GVU\\SQLEXPRESS;Database=SetUp;Trusted_Connection=True;MultipleActiveResultSets=true;TrustServerCertificate=True";
 
         public RegisterModel(HttpClient httpClient)
         {
@@ -46,7 +48,6 @@ namespace aspteamWeb.Pages.Company
             public string CompanySize { get; set; } = string.Empty;
         }
 
-        // Add this class to deserialize the API response
         public class AuthResponse
         {
             public int UserId { get; set; }
@@ -56,7 +57,6 @@ namespace aspteamWeb.Pages.Company
 
         public void OnGet()
         {
-            // Initialize if needed
         }
 
         public async Task<IActionResult> OnPostAsync()
@@ -68,8 +68,6 @@ namespace aspteamWeb.Pages.Company
             {
                 var apiUrl = "https://localhost:7289/api/Auth/register-company";
 
-                // FIXED: Remove the 'dto' wrapper and send data directly
-                // Also convert CompanySize to int
                 var payload = new
                 {
                     CompanyName = Input.CompanyName?.Trim(),
@@ -84,21 +82,32 @@ namespace aspteamWeb.Pages.Company
 
                 if (response.IsSuccessStatusCode)
                 {
-                    // Get the response data containing UserId and Token
                     var result = await response.Content.ReadFromJsonAsync<AuthResponse>();
 
                     if (result != null)
                     {
-                        // Store authentication data in session or cookies
-                        HttpContext.Session.SetString("UserId", result.UserId.ToString());
-                        HttpContext.Session.SetString("Token", result.Token);
-                        HttpContext.Session.SetString("Role", result.Role);
+                        // ✅ FETCH CompanyId FROM DATABASE (Same as Login does)
+                        int companyId = GetCompanyIdFromDatabase(result.UserId);
 
-                        TempData["SuccessMessage"] = "Account created successfully!";
-                        return RedirectToPage("/Company/CompanyDashboard");
+                        if (companyId > 0)
+                        {
+                            // Store ALL session data
+                            HttpContext.Session.SetInt32("UserId", result.UserId);
+                            HttpContext.Session.SetInt32("CompanyId", companyId); // ✅ THIS IS THE FIX!
+                            HttpContext.Session.SetString("Token", result.Token);
+                            HttpContext.Session.SetString("Role", result.Role);
+                            HttpContext.Session.SetString("UserType", "Company");
+                            HttpContext.Session.SetString("UserEmail", Input.Email);
+
+                            TempData["SuccessMessage"] = "Account created successfully! Complete your profile.";
+                            return RedirectToPage("/Company/ProfileCompany");
+                        }
+                        else
+                        {
+                            ModelState.AddModelError(string.Empty, "Account created but company profile not found. Please login.");
+                            return Page();
+                        }
                     }
-
-                    return RedirectToPage("/Login");
                 }
 
                 var errorContent = await response.Content.ReadAsStringAsync();
@@ -116,7 +125,38 @@ namespace aspteamWeb.Pages.Company
             return Page();
         }
 
-        // Convert industry string to enum value (integer)
+        // ✅ Get CompanyId from database using UserId (Same logic as Login)
+        private int GetCompanyIdFromDatabase(int userId)
+        {
+            try
+            {
+                using (SqlConnection connection = new SqlConnection(connectionString))
+                {
+                    connection.Open();
+
+                    string sql = "SELECT Id FROM CompanyAccounts WHERE UserId = @UserId";
+
+                    using (SqlCommand command = new SqlCommand(sql, connection))
+                    {
+                        command.Parameters.AddWithValue("@UserId", userId);
+
+                        var result = command.ExecuteScalar();
+                        if (result != null)
+                        {
+                            return Convert.ToInt32(result);
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                // Log error if needed
+                Console.WriteLine($"Error fetching CompanyId: {ex.Message}");
+            }
+
+            return 0;
+        }
+
         private int ConvertIndustryToEnum(string industry)
         {
             return industry switch
@@ -130,11 +170,10 @@ namespace aspteamWeb.Pages.Company
                 "Consulting" => 6,
                 "RealEstate" => 7,
                 "Other" => 8,
-                _ => 8 // Default to Other
+                _ => 8
             };
         }
 
-        // Convert company size string to integer
         private int ConvertCompanySizeToInt(string companySize)
         {
             return companySize switch
@@ -144,7 +183,7 @@ namespace aspteamWeb.Pages.Company
                 "51-200" => 200,
                 "201-500" => 500,
                 "500+" => 1000,
-                _ => 0
+                _ => 10
             };
         }
     }
