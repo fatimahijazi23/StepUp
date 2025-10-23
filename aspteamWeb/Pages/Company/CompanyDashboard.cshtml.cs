@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using System.Text;
 using System.Text.Json;
 
 namespace aspteamWeb.Pages.Company
@@ -74,14 +75,75 @@ namespace aspteamWeb.Pages.Company
             }
         }
 
+        public async Task<IActionResult> OnPostCloseJobAsync(int id)
+        {
+            try
+            {
+                var companyId = HttpContext.Session.GetInt32("CompanyId");
+                if (companyId == null)
+                {
+                    return RedirectToPage("/Account/Login");
+                }
+
+                var apiUrl = _configuration["ApiUrl"] ?? "https://localhost:7289/api";
+                var client = _httpClientFactory.CreateClient();
+
+                // First, get the job to verify ownership
+                var getResponse = await client.GetAsync($"{apiUrl}/Jobs/{id}");
+                if (!getResponse.IsSuccessStatusCode)
+                {
+                    TempData["Error"] = "Job not found.";
+                    return RedirectToPage();
+                }
+
+                var jobJson = await getResponse.Content.ReadAsStringAsync();
+                var job = JsonSerializer.Deserialize<JobDto>(jobJson, new JsonSerializerOptions
+                {
+                    PropertyNameCaseInsensitive = true
+                });
+
+                // Verify ownership
+                if (job.PostedBy != companyId.Value)
+                {
+                    TempData["Error"] = "You don't have permission to close this job.";
+                    return RedirectToPage();
+                }
+
+                // Update job to set IsActive = false
+                job.IsActive = false;
+
+                var updateJson = JsonSerializer.Serialize(job);
+                var content = new StringContent(updateJson, Encoding.UTF8, "application/json");
+
+                var updateResponse = await client.PutAsync($"{apiUrl}/Jobs/{id}", content);
+
+                if (updateResponse.IsSuccessStatusCode)
+                {
+                    TempData["Success"] = "Job closed successfully! It will still appear in your history.";
+                }
+                else
+                {
+                    TempData["Error"] = "Failed to close the job.";
+                }
+
+                return RedirectToPage();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error closing job {JobId}", id);
+                TempData["Error"] = "An error occurred while closing the job.";
+                return RedirectToPage();
+            }
+        }
+
         private string GetEmploymentTypeText(int employmentType)
         {
             return employmentType switch
             {
-                0 => "Full-Time",
-                1 => "Part-Time",
-                2 => "Contract",
-                3 => "Internship",
+                1 => "Full-Time",
+                2 => "Part-Time",
+                3 => "Contract",
+                4 => "Internship",
                 _ => "Unknown"
             };
         }
@@ -99,8 +161,8 @@ namespace aspteamWeb.Pages.Company
             public int ExperienceLevel { get; set; }
             public int EmploymentType { get; set; }
             public int WorkArrangement { get; set; }
-            public decimal MaxSalaryRange { get; set; }
-            public decimal MinSalaryRange { get; set; }
+            public decimal? MaxSalaryRange { get; set; }
+            public decimal? MinSalaryRange { get; set; }
             public DateTime CreatedAt { get; set; }
             public bool IsActive { get; set; }
         }

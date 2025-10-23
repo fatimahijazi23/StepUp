@@ -66,7 +66,7 @@
                 <li class="nav-item"><a class="nav-link" asp-page="/Company/CompanyDashboard">Dashboard</a></li>
                 <li class="nav-item"><a class="nav-link" asp-page="/Company/ProfileCompany">Profile</a></li>
                 <li class="nav-item"><a class="nav-link" asp-page="/Company/History">History</a></li>
-                <li class="nav-item"><a class="nav-link" asp-page="/Logout">Logout</a></li>
+                <li class="nav-item"><a class="nav-link" asp-page="/Company/Login">Logout</a></li>
             </ul>
         </div>
     </div>
@@ -157,9 +157,14 @@
                             <a asp-page="/Company/ViewApplicants" asp-route-id="@job.Id" class="btn btn-outline-primary btn-sm">
                                 <i class="bi bi-people"></i> View Applicants (@job.ApplicantCount)
                             </a>
-                            <button class="btn btn-outline-secondary btn-sm">
-                                <i class="bi bi-x-circle"></i> Close Job
-                            </button>
+                            @if (job.Status == "Active")
+                            {
+                                <form method="post" asp-page-handler="CloseJob" asp-route-id="@job.Id" style="display:inline;">
+                                    <button type="submit" class="btn btn-outline-danger btn-sm" onclick="return confirm('Are you sure you want to close this job? It will no longer accept applications.');">
+                                        <i class="bi bi-x-circle"></i> Close Job
+                                    </button>
+                                </form>
+                            }
                         </div>
                     </div>
                 </div>
