@@ -1,7 +1,10 @@
+
+
 @page
-@model aspteamWeb.Pages.JobSeeker.ResumeTestModel
+@model ResumeTestModel
 @{
     ViewData["Title"] = "Test Your Resume";
+    Layout = "/Pages/Shared/_JobSeekerLayout.cshtml";
 }
 
 <div class="container">
@@ -21,8 +24,7 @@
             <!-- Job Description -->
             <div class="mb-3">
                 <label class="form-label fw-bold">Job Description</label>
-                <textarea asp-for="JobDescription" class="form-control" rows="6"
-                          placeholder="Paste the job description here..."></textarea>
+                <textarea asp-for="JobDescription" class="form-control" rows="6">@Model.JobDescription</textarea>
             </div>
 
             <!-- Submit -->

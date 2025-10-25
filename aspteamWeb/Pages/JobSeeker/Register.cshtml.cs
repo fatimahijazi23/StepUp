@@ -62,7 +62,7 @@ namespace aspteamWeb.Pages.JobSeeker
                 {
                     TempData["SuccessMessage"] = "Account created successfully!";
                    
-                    return RedirectToPage("/Login");
+                    return RedirectToPage("/JobSeeker/Login");
                 }
 
                 var errorContent = await response.Content.ReadAsStringAsync();

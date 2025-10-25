@@ -1,10 +1,18 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using System.Net.Http;
+using System.Net.Http.Headers;
+using static aspteamWeb.Pages.JobSeeker.JobDetailsModel;
 
 namespace aspteamWeb.Pages.JobSeeker
 { 
     public class ResumeTestModel : PageModel
     {
+        private readonly HttpClient _httpClient;
+        public ResumeTestModel(HttpClient httpClient)
+        {
+            _httpClient = httpClient;
+        }   
         [BindProperty]
         public IFormFile? ResumeFile { get; set; }
 
@@ -13,9 +21,35 @@ namespace aspteamWeb.Pages.JobSeeker
 
         public string? ResultMessage { get; set; }
 
-        public void OnGet()
+        public async  Task<IActionResult> OnGetAsync(int jobId)
         {
+            try
+            {
+                var token = HttpContext.Session.GetString("Token");
+                if (string.IsNullOrEmpty(token))
+                {
+                    Console.WriteLine("JWT token missing. Redirecting to login.");
+                    Response.Redirect("/JobSeeker/Login");
+                    return Page();
+                }
+
+                _httpClient.DefaultRequestHeaders.Authorization =
+                    new AuthenticationHeaderValue("Bearer", token);
+
+                var apiUrl = $"https://localhost:7289/api/Jobs/{jobId}";
+                var responseJob = await _httpClient.GetFromJsonAsync<JobResponse>(apiUrl);
+
+                if (responseJob != null)
+                    JobDescription = responseJob.Description;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error fetching job Details: {ex.Message}");
+            }
+
+            return Page();
         }
+        
 
         public async Task<IActionResult> OnPostAsync()
         {

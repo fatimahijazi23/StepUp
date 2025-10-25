@@ -15,49 +15,46 @@ namespace aspteamAPI.Repositories
         {
             _context = context;
         }
-
-        public async Task<bool> FollowCompanyAsync(int jobSeekerId, int companyId)
+        public async Task<bool> FollowCompanyAsync(int JobSeekerId, int companyId)
         {
             try
             {
-                // Check if already following
+                // Check if already following (directly by UserId)
                 var existingFollow = await _context.Follows
-                    .FirstOrDefaultAsync(f => f.JobSeekerId == jobSeekerId && f.CompanyId == companyId);
+                    .FirstOrDefaultAsync(f => f.JobSeekerId == JobSeekerId && f.CompanyId == companyId);
 
                 if (existingFollow != null)
                     return false; // Already following
 
-                // Check if company exists and get jobseeker info for notification
+                // Check if company exists
                 var company = await _context.CompanyAccounts
                     .FirstOrDefaultAsync(c => c.Id == companyId);
 
-                var jobSeeker = await _context.JobSeekerAccounts
-                    .Include(js => js.User)
-                    .FirstOrDefaultAsync(js => js.Id == jobSeekerId);
-
-                if (company == null || jobSeeker == null)
+                if (company == null)
                     return false;
 
+                // Add follow
                 var follow = new Follow
                 {
-                    JobSeekerId = jobSeekerId,
+                    JobSeekerId = JobSeekerId,  // now referencing the Users table
                     CompanyId = companyId,
                     FollowedAt = DateTime.UtcNow
                 };
-
                 _context.Follows.Add(follow);
 
-                // Create notification for company
-                var notification = new Notification
-                {
-                    UserId = company.UserId,
-                    Title = "New Follower",
-                    Message = $"{jobSeeker.User.Name} started following your company",
-                    Type = "follow",
-                    CreatedAt = DateTime.UtcNow,
-                    IsRead = false
-                };
-                _context.Notifications.Add(notification);
+                // Optionally add notification for company
+                // var jobSeeker = await _context.JobSeekerAccounts.Include(js => js.User)
+                //     .FirstOrDefaultAsync(js => js.UserId == userId);
+                // var notification = new Notification
+                // {
+                //     UserId = company.UserId,
+                //     Title = "New Follower",
+                //     Message = $"{jobSeeker.User.Name} started following your company",
+                //     Type = "follow",
+                //     CreatedAt = DateTime.UtcNow,
+                //     IsRead = false
+                // };
+                // _context.Notifications.Add(notification);
 
                 await _context.SaveChangesAsync();
                 return true;
@@ -78,24 +75,27 @@ namespace aspteamAPI.Repositories
                     .ThenInclude(js => js.User)
                     .FirstOrDefaultAsync(f => f.JobSeekerId == jobSeekerId && f.CompanyId == companyId);
 
+                Console.WriteLine(follow);
+
                 if (follow == null)
                     return false;
 
                 _context.Follows.Remove(follow);
 
                 // Create notification for company about unfollow
-                var notification = new Notification
-                {
-                    UserId = follow.Company.UserId,
-                    Title = "Follower Update",
-                    Message = $"{follow.JobSeeker.User.Name} unfollowed your company",
-                    Type = "unfollow",
-                    CreatedAt = DateTime.UtcNow,
-                    IsRead = false
-                };
-                _context.Notifications.Add(notification);
+                //var notification = new Notification
+                //{
+                //    UserId = follow.Company.UserId,
+                //    Title = "Follower Update",
+                //    Message = $"{follow.JobSeeker.User.Name} unfollowed your company",
+                //    Type = "unfollow",
+                //    CreatedAt = DateTime.UtcNow,
+                //    IsRead = false
+                //};
+                //_context.Notifications.Add(notification);
 
                 await _context.SaveChangesAsync();
+
                 return true;
             }
             catch

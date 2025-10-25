@@ -2,6 +2,7 @@
 using aspteamAPI.DTOs;
 using aspteamAPI.IRepository;
 using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
 
 namespace aspteamAPI.Repositories
 {
@@ -15,8 +16,18 @@ namespace aspteamAPI.Repositories
             _context = context;
         }
 
+        
+
         public async Task<IEnumerable<Job>> GetAllAsync() =>
             await _context.Jobs.ToListAsync();
+
+        public async Task<string?> GetCompanyNameByIdAsync(int companyId)
+        {
+            var company = await _context.CompanyAccounts.FindAsync(companyId);
+            return company?.CompanyName;
+        }
+
+
 
         public async Task<Job?> GetByIdAsync(int id) =>
             await _context.Jobs.FindAsync(id);
@@ -80,6 +91,15 @@ namespace aspteamAPI.Repositories
             return await _context.Jobs
                 .Where(j => j.PostedBy == companyId)
                 .ToListAsync();
+        }
+   
+
+        public async Task<bool> IsFollowingCompanyAsync(int companyId , int UserId)
+        {
+           var response = await  _context.Follows
+                .AnyAsync(fc => fc.CompanyId == companyId && fc.JobSeekerId== UserId);
+            Console.WriteLine($"IsFollowingCompanyAsync: CompanyId={companyId}, JobSeekerId={UserId}, Result={response}");
+            return response;
         }
     }
 

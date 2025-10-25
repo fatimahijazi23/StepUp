@@ -1,6 +1,9 @@
 ﻿using aspteamAPI.DTOs;
+using aspteamAPI.IRepository;
 using aspteamAPI.Repositories;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
+
 
 namespace aspteamAPI.Controllers
 {
@@ -10,19 +13,67 @@ namespace aspteamAPI.Controllers
     public class JobsController : ControllerBase
     {
         private readonly IJobRepository _jobRepository;
+        private readonly IJobSeekerRepository _jobSeekerRepository;
 
-        public JobsController(IJobRepository jobRepository)
+        public JobsController(IJobRepository jobRepository , IJobSeekerRepository jobSeekerRepository)
         {
             _jobRepository = jobRepository;
+            _jobSeekerRepository = jobSeekerRepository;
+        }
+
+        private int GetCurrentUserId()
+        {
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            Console.WriteLine($"Current User ID from JWT: {userIdClaim}");
+            if (string.IsNullOrEmpty(userIdClaim))
+                throw new UnauthorizedAccessException("User ID claim not found in JWT");
+            return int.Parse(userIdClaim);
+        }
+
+
+        [HttpGet("is-following/{companyId}")]
+        public async Task<bool> IsFollowingCompanyAsync(int companyId)
+        {
+            var userId = GetCurrentUserId();
+            var jobSeeker = await  _jobSeekerRepository.GetJobSeekerByUserIdAsync(userId);
+            return await _jobRepository.IsFollowingCompanyAsync(companyId, jobSeeker.Id);
         }
 
         // GET /api/jobs
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<JobDto>>> GetJobs()
+        public async Task<ActionResult<IEnumerable<JobListDto>>> GetJobs()
         {
             var jobs = await _jobRepository.GetAllAsync();
-            return Ok(jobs.Select(ToDto));
+            var jobList = new List<JobListDto>();
+
+            foreach (var job in jobs)
+            {
+                string companyName = await _jobRepository.GetCompanyNameByIdAsync(job.PostedBy);
+             
+                bool isFollowing = await IsFollowingCompanyAsync(job.PostedBy);
+
+                jobList.Add(new JobListDto
+                {
+                    Id = job.Id,
+                    CompanyId = job.PostedBy,
+                    IsFollowing = isFollowing,
+                    CompanyName = companyName,
+                    Title = job.Title,
+                    Description = job.Description,
+                    Location = job.Location,
+                    ExperienceLevel = job.ExperienceLevel,
+                    EmploymentType = job.EmploymentType,
+                    WorkArrangement = job.WorkArrangement,
+                    MinSalaryRange = job.MinSalaryRange,
+                    MaxSalaryRange = job.MaxSalaryRange,
+                    CreatedAt = job.CreatedAt,
+                    IsActive = job.IsActive
+                }); 
+            }
+
+            return Ok(jobList);
         }
+
 
         // GET /api/jobs/{jobId}
         [HttpGet("{jobId}")]
@@ -146,7 +197,31 @@ namespace aspteamAPI.Controllers
                 CreatedAt = job.CreatedAt,
                 IsActive = job.IsActive
             };
+    
+
+    private static JobListDto ToJobListDto(Job job) =>
+            new JobListDto
+            {
+                Id = job.Id,
+                //CompanyName = CompanyAccount.
+                Description = job.Description,
+                Requirements = job.Requirements,
+                Location = job.Location,
+                Industry = job.Industry,
+                ExperienceLevel = job.ExperienceLevel,
+                EmploymentType = job.EmploymentType,
+                WorkArrangement = job.WorkArrangement,
+                MaxSalaryRange = job.MaxSalaryRange,
+                MinSalaryRange = job.MinSalaryRange,
+                CreatedAt = job.CreatedAt,
+                IsActive = job.IsActive
+
+            };
+
+       
     }
+
+
 
 
 }

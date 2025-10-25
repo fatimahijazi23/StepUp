@@ -3,11 +3,22 @@
     public class JobListDto
     {
         public int Id { get; set; }
-        public string CompanyName { get; set; }
-        public string Description { get; set; }
-        public string Location { get; set; }
-        public decimal? MinSalaryRange { get; set; }
+        public int CompanyId { get; set; }
+        
+        public bool IsFollowing { get; set; } = true;
+        public string CompanyName  { get; set; }
+        public string Title { get; set; }
+        public string? Description { get; set; }
+        public string? Requirements { get; set; }
+        public string? Location { get; set; }
+        public Industry? Industry { get; set; }
+        public ExperienceLevel? ExperienceLevel { get; set; }
+        public EmploymentType? EmploymentType { get; set; }
+        public WorkArrangement? WorkArrangement { get; set; }
         public decimal? MaxSalaryRange { get; set; }
+        public decimal? MinSalaryRange { get; set; }
+        public DateTime CreatedAt { get; set; }
+        public bool IsActive { get; set; }
     }
 
 }

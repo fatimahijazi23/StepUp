@@ -16,57 +16,56 @@ namespace aspteamAPI.Repositories
         public async Task<UpdateJobSeekerProfileDTO?> GetJobSeekerProfile(int id)
         {
             var jobSeeker = await _context.JobSeekerAccounts
-                .Include( u => u.User)
+                .AsNoTracking()
+                .Include(u => u.User)
                 .SingleOrDefaultAsync(u => u.Id == id);
+            int FollowCount = _context.Follows.Count(f => f.JobSeekerId == id);
 
-            if (jobSeeker == null) return null;
+            if (jobSeeker == null || jobSeeker.User == null) return null;
 
             return new UpdateJobSeekerProfileDTO
             {
-                Id = jobSeeker.Id,
                 Name = jobSeeker.User.Name,
                 Email = jobSeeker.User.Email,
                 Bio = jobSeeker.Bio,
-                ProfilePictureUrl = jobSeeker.ProfilePictureUrl
-
+                ProfilePictureUrl = jobSeeker.ProfilePictureUrl,
+                FollowCount = FollowCount
             };
         }
 
-        public async Task<UpdateJobSeekerProfileDTO?> UpdateJobSeekerProfile(UpdateJobSeekerProfileDTO dto)
+
+        public async Task<UpdateJobSeekerProfileDTO?> UpdateJobSeekerProfile(int id, UpdateJobSeekerProfileDTO dto)
         {
-            // Get job seeker account from db 
             var jobSeekerAccount = await _context.JobSeekerAccounts
                 .Include(js => js.User)
-                .FirstOrDefaultAsync(js => js.Id == dto.Id);
+                .FirstOrDefaultAsync(js => js.Id == id);
 
             if (jobSeekerAccount == null)
-            {
-                return null; // Not found
-            }
+                return null;
 
             // Update only provided fields
             if (!string.IsNullOrEmpty(dto.ProfilePictureUrl))
-                jobSeekerAccount.ProfilePictureUrl = dto.ProfilePictureUrl;
+                jobSeekerAccount.ProfilePictureUrl = dto.ProfilePictureUrl.Trim();
 
-            if (!string.IsNullOrEmpty(dto.Name))
-                jobSeekerAccount.User.Name = dto.Name;
+            if (jobSeekerAccount.User != null)
+            {
+                if (!string.IsNullOrEmpty(dto.Name))
+                    jobSeekerAccount.User.Name = dto.Name.Trim();
 
-            if (!string.IsNullOrEmpty(dto.Email))
-                jobSeekerAccount.User.Email = dto.Email;
+                if (!string.IsNullOrEmpty(dto.Email))
+                    jobSeekerAccount.User.Email = dto.Email.Trim();
+            }
 
             if (!string.IsNullOrEmpty(dto.Bio))
-                jobSeekerAccount.Bio = dto.Bio;
+                jobSeekerAccount.Bio = dto.Bio.Trim();
 
-            // Save changes
             await _context.SaveChangesAsync();
 
-           
             return new UpdateJobSeekerProfileDTO
             {
-                Id = jobSeekerAccount.Id,
                 ProfilePictureUrl = jobSeekerAccount.ProfilePictureUrl,
-                Name = jobSeekerAccount.User.Name,
-                Email = jobSeekerAccount.User.Email,
+                Name = jobSeekerAccount.User?.Name ?? string.Empty,
+                Email = jobSeekerAccount.User?.Email ?? string.Empty,
                 Bio = jobSeekerAccount.Bio
             };
         }

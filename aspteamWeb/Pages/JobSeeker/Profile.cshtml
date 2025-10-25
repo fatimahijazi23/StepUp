@@ -1,36 +1,67 @@
 @page
-@model aspteamWeb.Pages.JobSeeker.ProfileModel
+@model ProfileModel
 @{
     ViewData["Title"] = "Profile";
+    Layout = "/Pages/Shared/_JobSeekerLayout.cshtml";
 }
 
 <div class="container">
     <div class="profile-card text-center">
+        <!-- Profile Picture -->
+        <div class="avatar mb-2">
+            @if (!string.IsNullOrEmpty(Model.Input.ProfilePictureUrl))
+            {
+                <img src="@Model.Input.ProfilePictureUrl" class="rounded-circle" style="width:80px; height:80px; object-fit:cover;" />
+            }
+            else
+            {
+                <div class="avatar-placeholder">N/A</div>
+            }
+        </div>
+
+        @if (!ViewData.ModelState.IsValid)
+        {
+            <div class="alert alert-danger">
+                @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+                {
+                    <div>@error.ErrorMessage</div>
+                }
+            </div>
+        }
+
         <!-- Profile Info -->
-        <div class="avatar">@Model.UserName?[0]</div>
-        <h4>@Model.UserName</h4>
-        <p>Email: @Model.Email</p>
-        <p>About: @(string.IsNullOrWhiteSpace(Model.About) ? "-" : Model.About)</p>
-        <p><strong>@Model.FollowingCount</strong> Following</p>
+        <h4>@Model.Input.Name</h4>
+        <p>Email: @Model.Input.Email</p>
+        <p>About: @(string.IsNullOrWhiteSpace(Model.Input.Bio) ? "-" : Model.Input.Bio)</p>
+        <p><strong>@Model.Input.FollowCount</strong> Following</p>
 
-        <!-- Edit Button -->
-        <button class="btn btn-edit" type="button" onclick="toggleForm()">Edit Profile</button>
+        <!-- Buttons -->
+        <button class="btn btn-edit mt-2" type="button" onclick="toggleForm()">Edit Profile</button>
+     
 
-        <!-- Edit Form (hidden initially) -->
-        <div id="editForm" class="mt-4" style="display:none;">
+        <!-- Edit Form -->
+        <div id="editForm" class="mt-4 d-none">
             <form method="post">
+                <div asp-validation-summary="All" class="text-danger mb-3"></div>
+
                 <div class="mb-3 text-start">
                     <label class="form-label">Full Name</label>
-                    <input asp-for="Input.UserName" class="form-control" />
+                    <input asp-for="Input.Name" class="form-control" />
+                    <span asp-validation-for="Input.Name" class="text-danger"></span>
                 </div>
+
                 <div class="mb-3 text-start">
                     <label class="form-label">Email</label>
                     <input asp-for="Input.Email" class="form-control" />
+                    <span asp-validation-for="Input.Email" class="text-danger"></span>
                 </div>
+
                 <div class="mb-3 text-start">
                     <label class="form-label">About</label>
-                    <textarea asp-for="Input.About" class="form-control"></textarea>
+                    <textarea asp-for="Input.Bio" class="form-control"></textarea>
+                    <span asp-validation-for="Input.Bio" class="text-danger"></span>
                 </div>
+
                 <button type="submit" class="btn btn-primary w-100">Save Changes</button>
             </form>
         </div>
@@ -40,6 +71,37 @@
             <div class="alert alert-success mt-3">@TempData["Success"]</div>
         }
     </div>
+
+    <!-- Followed Companies Section -->
+   
+        <div class="container mt-4">
+            @if (Model.FollowedCompanies.Any())
+            {
+                <div class="row">
+                    @foreach (var company in Model.FollowedCompanies)
+                    {
+                        <div class="col-md-5 m-2">
+                            <div class="card shadow-sm p-3 rounded-4 border-0">
+                                <h5>@company.CompanyName</h5>
+                                <p>@company.Industry</p>
+                                <p>@company.About</p>
+                                <form method="post" asp-page-handler="Unfollow">
+                                    <input type="hidden" name="companyId" value="@company.Id" />
+                                    <button type="submit" class="btn btn-outline-danger btn-sm">Unfollow</button>
+                                </form>
+                          
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+            else
+            {
+                <div class="text-center text-muted">You’re not following any companies yet.</div>
+            }
+        </div>
+    
+
 </div>
 
 @section Styles {
@@ -56,24 +118,42 @@
             box-shadow: 0 4px 12px rgba(0,0,0,0.1);
             padding: 30px;
             margin-top: 40px;
+            max-width: 400px;
+            margin-left: auto;
+            margin-right: auto;
         }
 
-        .avatar {
+        .avatar-placeholder {
+            background-color: #ccc;
+            border-radius: 50%;
             width: 80px;
             height: 80px;
-            border-radius: 50%;
-            background-color: #0d6efd;
-            color: #fff;
-            font-size: 36px;
             display: flex;
             align-items: center;
             justify-content: center;
-            margin-bottom: 10px;
+            font-size: 14px;
+            color: #555;
+            margin: 0 auto;
         }
 
         .btn-edit {
             background-color: #0d6efd;
             color: #fff;
+            font-weight: 500;
+        }
+
+        .card {
+            border-radius: 12px;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+            .card:hover {
+                transform: translateY(-4px);
+                box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+            }
+
+        .btn-outline-danger {
+            border-radius: 8px;
             font-weight: 500;
         }
     </style>
@@ -82,8 +162,11 @@
 @section Scripts {
     <script>
         function toggleForm() {
-            var form = document.getElementById("editForm");
-            form.style.display = form.style.display === "none" ? "block" : "none";
+            document.getElementById("editForm").classList.toggle("d-none");
+        }
+
+        function toggleFollowing() {
+            document.getElementById("followingSection").classList.toggle("d-none");
         }
     </script>
 }

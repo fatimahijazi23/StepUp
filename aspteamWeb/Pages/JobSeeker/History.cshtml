@@ -1,0 +1,157 @@
+﻿@page
+@model HistoryModel
+
+@{
+    ViewData["Title"] = "My Applications History";
+    Layout = "/Pages/Shared/_JobSeekerLayout.cshtml";
+}
+
+<div class="container mt-4">
+    <h2 class="mb-4 fw-bold">My Applications</h2>
+
+    @if (Model.Applications == null || !Model.Applications.Any())
+    {
+        <div class="alert alert-info">You haven’t applied for any jobs yet.</div>
+    }
+    else
+    {
+        <table class="table table-striped align-middle shadow-sm">
+            <thead class="table-dark">
+                <tr>
+                    <th>#</th>
+                    <th>Job Title</th>
+                    <th>Company</th>
+                    <th>Status</th>
+                    <th>Applied On</th>
+                    <th>Score</th>
+                    <th>Notes</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var app in Model.Applications)
+                {
+                    <tr>
+                        <td>@app.Id</td>
+                        @* <td>@app.Job?.Title ?? "—"</td> *@
+                        <td>@app.Job?.Company?.CompanyName ?? "—"</td>
+                        <td>
+                            <span class="badge bg-@(GetStatusColor(app.Status))">
+                                @app.Status
+                            </span>
+                        </td>
+                        <td>@app.CreatedAt.ToString("yyyy-MM-dd")</td>
+                        <td>@(app.Evaluation?.Score?.ToString() ?? "—")</td>
+                        <td>@(app.Evaluation?.Notes ?? "—")</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+</div>
+
+@functions {
+    private string GetStatusColor(HistoryModel.ApplicationStatusBadge status)
+    {
+        return status switch
+        {
+            HistoryModel.ApplicationStatusBadge.Applied => "primary",
+            HistoryModel.ApplicationStatusBadge.UnderReview => "warning",
+            HistoryModel.ApplicationStatusBadge.Interview => "info",
+            HistoryModel.ApplicationStatusBadge.Rejected => "danger",
+            HistoryModel.ApplicationStatusBadge.Hired => "success",
+            _ => "secondary"
+        };
+    }
+}
+
+<style>
+    /* Container spacing */
+    .container {
+        max-width: 1000px;
+        margin: auto;
+        padding: 20px;
+        font-family: 'Roboto', sans-serif;
+    }
+
+    /* Table styling */
+    table.table {
+        border-collapse: separate;
+        border-spacing: 0;
+        width: 100%;
+        background-color: #fff;
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+    }
+
+        /* Table headers */
+        table.table thead th {
+            background-color: #343a40;
+            color: #fff;
+            font-weight: 600;
+            text-align: left;
+            padding: 12px 15px;
+        }
+
+        /* Table rows */
+        table.table tbody td {
+            padding: 12px 15px;
+            vertical-align: middle;
+            color: #495057;
+        }
+
+    /* Striped rows */
+    table.table-striped tbody tr:nth-of-type(odd) {
+        background-color: #f8f9fa;
+    }
+
+    /* Badges */
+    .badge {
+        padding: 5px 10px;
+        font-size: 0.85rem;
+        border-radius: 12px;
+        font-weight: 500;
+    }
+
+    /* Status colors */
+    .bg-primary {
+        background-color: #0d6efd !important;
+    }
+
+    .bg-warning {
+        background-color: #ffc107 !important;
+        color: #212529;
+    }
+
+    .bg-info {
+        background-color: #0dcaf0 !important;
+        color: #212529;
+    }
+
+    .bg-danger {
+        background-color: #dc3545 !important;
+    }
+
+    .bg-success {
+        background-color: #198754 !important;
+    }
+
+   
+
+    table.table tbody td {
+        display: block;
+        width: 100%;
+        padding-left: 50%;
+        position: relative;
+    }
+
+        table.table tbody td::before {
+            content: attr(data-label);
+            position: absolute;
+            left: 15px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+    }
+</style>

@@ -1,31 +1,18 @@
 @page
-@model aspteamWeb.Pages.JobSeeker.JobSeekerDashboardModel
+@model JobSeekerDashboardModel
 @{
     ViewData["Title"] = "Job Seeker Dashboard";
+    Layout = "/Pages/Shared/_JobSeekerLayout.cshtml";
 }
 
-<!-- Navbar -->
-<nav class="navbar navbar-expand-lg navbar-dark">
-    <div class="container">
-        <a class="navbar-brand fw-bold" href="#">StepUp</a>
-        <div class="collapse navbar-collapse">
-            <ul class="navbar-nav ms-auto">
-                <li class="nav-item"><a class="nav-link" asp-page="/JobSeeker/JobSeekerDashboard">Home</a></li>
-                <li class="nav-item"><a class="nav-link" asp-page="/JobSeeker/Profile">Profile</a></li>
-                <li class="nav-item"><a class="nav-link" asp-page="/JobSeeker/History">History</a></li>
-                <li class="nav-item"><a class="nav-link" asp-page="/Logout">Logout</a></li>
-            </ul>
-        </div>
-    </div>
-</nav>
-
 <!-- Search Section -->
-<div class="container search-container animate__animated animate__fadeIn">
+@* <div class="container search-container animate__animated animate__fadeIn">
     <div class="row mb-3">
         <div class="col-12">
             <input type="text" class="form-control form-control-lg" placeholder="Search by company or job title..." />
         </div>
     </div>
+
     <div class="row g-2">
         <div class="col-md-3">
             <select class="form-select">
@@ -52,26 +39,10 @@
             </select>
         </div>
         <div class="col-md-3">
-            <select class="form-select">
-                <option>All Sizes</option>
-                <option>1-10</option>
-                <option>11-50</option>
-                <option>51-200</option>
-                <option>200+</option>
-            </select>
-        </div>
-        <div class="col-md-3">
             <select class="form-select mt-2">
                 <option>Today</option>
                 <option>This Week</option>
                 <option>This Month</option>
-            </select>
-        </div>
-        <div class="col-md-3">
-            <select class="form-select mt-2">
-                <option>0 - 50k$</option>
-                <option>50k$ - 100k$</option>
-                <option>100k$+</option>
             </select>
         </div>
         <div class="col-md-3">
@@ -82,11 +53,102 @@
             </select>
         </div>
     </div>
-</div>
+</div> *@
+<form method="post" asp-page-handler="Filter" class="row g-2">
+    <div class="col-md-4">
+        <input asp-for="Filter.Keyword" class="form-control" placeholder="Search by company or job title..." />
+    </div>
+    <div class="col-md-3">
+        <input asp-for="Filter.Location" class="form-control" placeholder="Location..." />
+    </div>
+    <div class="col-md-3">
+        <select asp-for="Filter.Industry" class="form-select">
+            <option value="">All Industries</option>
+            <option value="1">Tech</option>
+            <option value="2">Finance</option>
+            <option value="3">Education</option>
+        </select>
+    </div>
+    <div class="col-md-2">
+        <button type="submit" class="btn btn-primary w-100">Filter</button>
+    </div>
+</form>
 
-<footer>
-    <p>Â© 2025 StepUp. All rights reserved.</p>
-</footer>
+
+<!-- Jobs List -->
+<div class="container jobs-list mt-4">
+    @if (Model.JobListings != null && Model.JobListings.Any())
+    {
+        foreach (var job in Model.JobListings)
+        {
+            
+            <div class="job-card">
+                <div class="job-card-header">
+                    @* <div class="company-logo">
+                        @job.CompanyName?.Substring(0, 1).ToUpper()
+                    </div> *@
+                    <div class="company-logo">
+                        @(string.IsNullOrEmpty(job.CompanyName) ? "?" : job.CompanyName.Substring(0, 1).ToUpper())
+                    </div>
+
+                    <div class="job-info">
+                        <h3>@job.Title</h3>
+                        <p>@job.CompanyName • @job.Location</p>
+                    </div>
+                </div>
+
+                <div class="job-description">
+                    @job.Description
+                </div>
+
+                <div class="job-meta">
+                    <span><i class="fas fa-briefcase"></i> @job.EmploymentType</span>
+                    <span><i class="fas fa-building"></i> @job.Industry</span>
+                    <span><i class="fas fa-clock"></i> @job.CreatedAt.ToString("MMM dd, yyyy")</span>
+
+                    @if (job.MinSalaryRange != null)
+                    {
+                        <span><i class="fas fa-dollar-sign"></i> @job.MinSalaryRange</span>
+                    }
+                </div>
+
+                <div class="job-actions">
+                    
+                        <form method="get" asp-page="/JobSeeker/JobDetails">
+                            <input type="hidden" name="id" value="@job.Id" />
+                            <button type="submit" class="btn btn-primary">View Details</button>
+                        </form>
+                    
+
+                    <button class="btn btn-secondary" onclick="testResume('@job.Id')">
+                        Test Resume
+                    </button>
+                    @{if(!@job.IsFollowing){
+                    <form method="post" asp-page-handler="Follow" class="d-inline">
+                        <input type="hidden" name="companyId" value="@job.CompanyId" />
+                        <button type="submit" class="btn btn-outline-primary">Follow</button>
+                    </form>
+                    }
+                    else{
+                    <form method="post" asp-page-handler="UnFollow" class="d-inline">
+                        <input type="hidden" name="companyId" value="@job.CompanyId" />
+                        <button type="submit" class="btn btn-outline-secondary">UnFollow</button>
+                    </form>
+
+                    }}
+                   
+
+                </div>
+            </div>
+        }
+    }
+    else
+    {
+        <p class="text-muted text-center mt-5">
+            No jobs available right now. Maybe everyone suddenly got hired, who knows.
+        </p>
+    }
+</div>
 
 @section Styles {
     <!-- Bootstrap & Animate CSS -->
@@ -99,15 +161,6 @@
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
 
-        .navbar {
-            background-color: #0d6efd;
-        }
-
-        .navbar a {
-            color: #fff !important;
-            font-weight: 500;
-        }
-
         .search-container {
             margin: 30px auto;
             padding: 20px;
@@ -117,20 +170,114 @@
             animation: fadeInDown 1s;
         }
 
-        .job-card {
-            animation: fadeInUp 1s;
+        .jobs-list {
+            margin-top: 40px;
+            margin-bottom: 60px;
         }
 
-        footer {
-            background: #0d6efd;
-            color: #fff;
-            padding: 15px;
-            margin-top: 40px;
-            text-align: center;
+        .job-card {
+            background-color: #fff;
+            border-radius: 10px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            transition: all 0.2s ease;
+            border: 1px solid #e0e0e0;
+            margin-bottom: 20px;
         }
+
+            .job-card:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            }
+
+        .job-card-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .company-logo {
+            width: 60px;
+            height: 60px;
+            border-radius: 8px;
+            background-color: #007bff;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+        .job-info h3 {
+            font-size: 1.25rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .job-info p {
+            color: #6c757d;
+            font-size: 0.9rem;
+        }
+
+        .job-description {
+            color: #555;
+            margin-bottom: 1rem;
+            line-height: 1.5;
+        }
+
+        .job-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin-bottom: 1rem;
+            font-size: 0.9rem;
+            color: #6c757d;
+        }
+
+            .job-meta span {
+                display: flex;
+                align-items: center;
+                gap: 0.25rem;
+            }
+
+        .job-actions {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .follow-btn {
+            background-color: transparent;
+            border: 1px solid #007bff;
+            color: #007bff;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 0.9rem;
+        }
+
+            .follow-btn:hover {
+                background-color: #007bff;
+                color: white;
+            }
     </style>
 }
 
 @section Scripts {
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function viewJobDetails(jobId) {
+            alert('Viewing job with ID: ' + jobId);
+        }
+
+        function testResume(jobId) {
+            alert('Testing resume for job: ' + jobId);
+        }
+
+        function toggleFollowCompany(company) {
+            alert('Toggled follow for: ' + company);
+        }
+    </script>
 }

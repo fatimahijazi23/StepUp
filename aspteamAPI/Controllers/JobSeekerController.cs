@@ -32,11 +32,8 @@ namespace aspteamAPI.Controllers
         {
             try
             {
-                var userId = GetCurrentUserId();
+                var userId = GetCurrentUserId(); // get from JWT
                 var jobSeeker = await _jobSeekerRepository.GetJobSeekerByUserIdAsync(userId);
-
-                if (jobSeeker == null)
-                    return BadRequest($"Job seeker account not found for user ID: {userId}");
 
                 var result = await _jobSeekerRepository.FollowCompanyAsync(jobSeeker.Id, companyId);
 
@@ -54,6 +51,8 @@ namespace aspteamAPI.Controllers
                 return StatusCode(500, new { message = "An error occurred", error = ex.Message });
             }
         }
+
+
 
         [HttpDelete("unfollow-company/{companyId}")]
         public async Task<IActionResult> UnfollowCompany(int companyId)

@@ -1,6 +1,8 @@
 ﻿using aspteamAPI.DTOs;
+using aspteamAPI.IRepository;
 using aspteamAPI.Repositories;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace aspteamAPI.Controllers
 {
@@ -9,34 +11,51 @@ namespace aspteamAPI.Controllers
     public class JobSeekerProfilesController : ControllerBase
     {
         private readonly IJobSeekerProfileRepo _repo;
+        private readonly IJobSeekerRepository _jobSeekerRepo;
 
-        public JobSeekerProfilesController(IJobSeekerProfileRepo repo)
+        public JobSeekerProfilesController(IJobSeekerProfileRepo repo, IJobSeekerRepository jobSeekerRepo)
         {
             _repo = repo;
+            _jobSeekerRepo= jobSeekerRepo;
         }
 
-        [HttpGet("{id}")]
-        public async Task<IActionResult> GetJobSeekerProfiles(int id)
+        private int GetCurrentUserId()
         {
-            var jobSeeker = await _repo.GetJobSeekerProfile(id);
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(userIdClaim))
+                throw new UnauthorizedAccessException("User ID claim not found in JWT");
+            return int.Parse(userIdClaim);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetJobSeekerProfiles()
+        {
+            int UserId = GetCurrentUserId();
+            var jobSeeker = await _jobSeekerRepo.GetJobSeekerByUserIdAsync(UserId);
 
             if (jobSeeker == null) return NotFound();
-            return Ok(jobSeeker);
+
+            var profile = await _repo.GetJobSeekerProfile(jobSeeker.Id);
+
+            return Ok(profile);
 
 
         }
 
         // PATCH: api/jobseekerprofiles/{id}
-        [HttpPatch("{id}")]
-        public async Task<IActionResult> EditJobSeekerProfile(int id, [FromBody] UpdateJobSeekerProfileDTO dto)
+        [HttpPatch]
+        public async Task<IActionResult> EditJobSeekerProfile( [FromBody] UpdateJobSeekerProfileDTO dto)
         {
-            if (dto == null || id != dto.Id)
+            int UserId = GetCurrentUserId();
+            var jobSeeker= await _jobSeekerRepo.GetJobSeekerByUserIdAsync(UserId);
+
+            if (dto == null)
                 return BadRequest("Invalid data.");
 
-            var updatedProfile = await _repo.UpdateJobSeekerProfile(dto);
+            var updatedProfile = await _repo.UpdateJobSeekerProfile(jobSeeker.Id, dto);
 
             if (updatedProfile == null)
-                return NotFound($"Job seeker with Id={id} not found.");
+                return NotFound($"Job seeker with Id={jobSeeker.Id} not found.");
 
             return Ok(updatedProfile); 
         }

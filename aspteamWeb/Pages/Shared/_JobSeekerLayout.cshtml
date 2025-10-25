@@ -1,0 +1,55 @@
+﻿<header>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container">
+            <a class="navbar-brand fw-bold" href="#">StepUp</a>
+
+            <!-- Toggler button for mobile -->
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                    aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item"><a class="nav-link" asp-page="/JobSeeker/JobSeekerDashboard">Home</a></li>
+                    <li class="nav-item"><a class="nav-link" asp-page="/JobSeeker/Profile">Profile</a></li>
+                    <li class="nav-item"><a class="nav-link" asp-page="/JobSeeker/History">History</a></li>
+                    <li class="nav-item"><a class="nav-link" asp-page="/JobSeeker/Logout">Logout</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+</header>
+
+<div class="container">
+    <main role="main" class="pb-3">
+        @RenderBody()
+    </main>
+</div>
+@RenderSection("Styles", required: false)
+@RenderSection("Scripts", required: false)
+
+
+<footer>
+    <p>© 2025 StepUp. All rights reserved.</p>
+</footer>
+
+<style>
+    .navbar {
+        background-color: #0d6efd;
+    }
+
+        .navbar a {
+            color: #fff !important;
+            font-weight: 500;
+        }
+
+    footer {
+        background: #0d6efd;
+        color: #fff;
+        padding: 15px;
+        margin-top: 40px;
+        text-align: center;
+    }
+</style>

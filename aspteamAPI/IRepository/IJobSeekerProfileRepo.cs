@@ -13,7 +13,7 @@ namespace aspteamAPI
 
         public Task<UpdateJobSeekerProfileDTO> GetJobSeekerProfile(int id);
 
-        public Task<UpdateJobSeekerProfileDTO> UpdateJobSeekerProfile(UpdateJobSeekerProfileDTO dto);
+        public Task<UpdateJobSeekerProfileDTO> UpdateJobSeekerProfile(int id ,UpdateJobSeekerProfileDTO dto);
         public Task<JobSeekerAccount> DeleteJobSeekerProfile(int id);
 
     }

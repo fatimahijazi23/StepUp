@@ -1,0 +1,105 @@
+﻿@page
+@model JobDetailsModel
+@{
+    ViewData["Title"] = "Job Details";
+    Layout = "/Pages/Shared/_JobSeekerLayout.cshtml";
+}
+
+<div id="job-details-page">
+    <div class="container">
+        <div class="job-details-content" id="job-details-content">
+
+            <div class="job-details-header">
+                <h1>@Model.Job.Title</h1>
+
+                <div class="job-details-company">@Model.Job.CompanyName</div>
+
+                <div class="job-details-meta">
+                    <span><i class="fas fa-map-marker-alt"></i> @Model.Job.Location</span>
+                    <span><i class="fas fa-briefcase"></i> @Model.Job.EmploymentType</span>
+                    <span><i class="fas fa-building"></i> @Model.Job.Industry</span>
+                    <span><i class="fas fa-clock"></i> Posted @Model.Job.CreatedAt.ToShortDateString()</span>
+
+                    @if (Model.Job.MinSalaryRange.HasValue && Model.Job.MaxSalaryRange.HasValue)
+                    {
+                        <span>
+                            <i class="fas fa-dollar-sign"></i>
+                            @Model.Job.MinSalaryRange - @Model.Job.MaxSalaryRange
+                        </span>
+                    }
+                </div>
+            </div>
+
+            <div class="job-details-section">
+                <h2>Job Description</h2>
+                <p>@Model.Job.Description</p>
+            </div>
+
+            <div class="job-details-section">
+                <h2>Requirements</h2>
+                <p>
+                    @(string.IsNullOrWhiteSpace(Model.Job.Requirements)
+                                        ? "No specific requirements listed."
+                                        : Model.Job.Requirements)
+                </p>
+            </div>
+            <div class="job-details-actions">
+                <form method="get" asp-page="/JobSeeker/ResumeTest">
+                    <input type="hidden" name="id" value="@Model.Job.Id" />
+                    <button type="submit" class="btn btn-primary">Test Resume</button>
+                </form>
+
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Job Details */
+    .job-details-content {
+        background-color: var(--card-background);
+        border-radius: var(--border-radius);
+        padding: 2rem;
+        box-shadow: var(--shadow);
+    }
+
+    .job-details-header {
+        border-bottom: 1px solid var(--border-color);
+        padding-bottom: 2rem;
+        margin-bottom: 2rem;
+    }
+
+        .job-details-header h1 {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+    .job-details-company {
+        color: var(--primary-color);
+        font-size: 1.2rem;
+        font-weight: 600;
+        margin-bottom: 1rem;
+    }
+
+    .job-details-meta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1.5rem;
+        color: var(--text-secondary);
+    }
+
+    .job-details-section {
+        margin-bottom: 2rem;
+    }
+
+        .job-details-section h2 {
+            margin-bottom: 1rem;
+            color: var(--text-primary);
+        }
+
+        .job-details-section p {
+            line-height: 1.7;
+            color: var(--text-secondary);
+        }
+</style>

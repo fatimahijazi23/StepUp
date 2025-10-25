@@ -1,10 +1,10 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
-namespace teamProject.WEB.Pages
+namespace aspteamWeb.Pages.JobSeeker
 {
-    public class LoginModel : PageModel
-    { 
+    public class JobsModel : PageModel
+    {
         public void OnGet()
         {
         }

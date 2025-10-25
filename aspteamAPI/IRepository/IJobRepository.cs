@@ -9,6 +9,8 @@ namespace aspteamAPI.Repositories
         Task<IEnumerable<string>> GetLocationsAsync();
         Task<IEnumerable<Industry>> GetCategoriesAsync();
         Task<IEnumerable<Job>> GetByCompanyIdAsync(int companyId);
+        Task<string?> GetCompanyNameByIdAsync(int companyId);
+        Task<bool> IsFollowingCompanyAsync(int companyId, int JobSeekerId);
     }
 
 
