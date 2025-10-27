@@ -42,7 +42,7 @@ namespace aspteamWeb.Pages.JobSeeker
             try
             {
                 var apiUrl = "https://localhost:7289/api/Auth/login-jobseeker";
-                
+
                 var response = await _httpClient.PostAsJsonAsync(apiUrl, Input);
 
                 if (response.IsSuccessStatusCode)

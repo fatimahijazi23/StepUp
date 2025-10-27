@@ -1,97 +1,121 @@
-﻿using aspteamAPI.DTOs;
-using Microsoft.AspNetCore.Mvc;
+﻿using aspteamAPI.context;
+using aspteamAPI.DTOs;
 using aspteamAPI.Repositories;
+using Microsoft.AspNetCore.Mvc;
+using System.Net.Http.Headers;
+using Newtonsoft.Json;
 
 namespace aspteamAPI.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class CVController : Controller
+    public class CvController : ControllerBase
     {
-        private ICvRepository _cvRepository;
+        private readonly ICvRepository _cvRepository;
 
-        public CVController(ICvRepository cvRepository)
+        public CvController(ICvRepository cvRepository)
         {
             _cvRepository = cvRepository;
         }
 
-        [HttpGet("userId/{userId}")]
-        public async Task<IActionResult> GetCvsByUserId(int userId)
-        {
-            var cvs = await _cvRepository.GetCvsByUserIdAsync(userId);
-
-            if (!cvs.Any())
-                return NotFound($"No CVs found for user with ID {userId}");
-
-            // Map entity → DTO
-            var dtoList = cvs.Select(cv => new CvDTO
-            {
-                JobSeekerId = cv.JobSeekerId,
-                FileUrl = "/files/" + cv.FileUrl,
-                UploadedAt = cv.UploadedAt,
-            });
-
-            return Ok(dtoList);
-        }
-
-        [HttpGet("CvId{cvId}")]
-        public async Task<IActionResult> GetCvsById(int cvId)
+        // Existing method for analyzing by CV ID
+        [HttpPost("analyze")]
+        public async Task<IActionResult> AnalyzeCv([FromForm] int cvId, [FromForm] string jobDescription)
         {
             var cv = await _cvRepository.GetCvByIdAsync(cvId);
+            if (cv == null)
+                return NotFound($"CV with ID = {cvId} not found");
 
-            if (cv == null) return NotFound($"CV with ID = {cvId} Not Found");
+            var filePath = Path.Combine("wwwroot/files", cv.FileUrl);
+            if (!System.IO.File.Exists(filePath))
+                return NotFound($"CV file '{cv.FileUrl}' not found on server");
 
+            using var client = new HttpClient();
+            using var form = new MultipartFormDataContent();
+            using var fileStream = System.IO.File.OpenRead(filePath);
 
-            return Ok(new CvDTO
-            {
-                JobSeekerId = cv.JobSeekerId,
-                FileUrl = cv.FileUrl,
-                UploadedAt = cv.UploadedAt
-            });
+            var fileContent = new StreamContent(fileStream);
+            fileContent.Headers.ContentType = MediaTypeHeaderValue.Parse("application/pdf");
+            form.Add(fileContent, "cvFile", cv.FileUrl);
+            form.Add(new StringContent(jobDescription), "jobDescription");
 
+            var n8nWebhookUrl = "https://n8nfatima.ddns.net/webhook/resume-evaluator";
+            var response = await client.PostAsync(n8nWebhookUrl, form);
+
+            if (!response.IsSuccessStatusCode)
+                return StatusCode((int)response.StatusCode, "Failed to process CV through n8n");
+
+            var analysisJson = await response.Content.ReadAsStringAsync();
+            return Ok(new { cvId = cv.Id, analysis = analysisJson });
         }
 
-        [HttpPost]
-        public async Task<IActionResult> AddCv([FromBody] CvDTO cvDto)
+        // NEW method for analyzing uploaded file directly
+        [HttpPost("analyze-upload")]
+        public async Task<IActionResult> AnalyzeUploadedCv([FromForm] IFormFile cvFile, [FromForm] string jobDescription)
         {
-            if (cvDto == null) return BadRequest("Invalid CV data");
+            if (cvFile == null || cvFile.Length == 0)
+                return BadRequest("No file uploaded");
 
-            // Map DTO → Entity
-            var cv = new CV
+            if (string.IsNullOrWhiteSpace(jobDescription))
+                return BadRequest("Job description is required");
+
+            try
             {
-                FileUrl = cvDto.FileUrl,
-                UploadedAt = DateTime.UtcNow,
-                JobSeekerId = cvDto.JobSeekerId
-            };
+                using var client = new HttpClient();
+                client.Timeout = TimeSpan.FromMinutes(5);
 
-            var createdCv = await _cvRepository.AddCvAsync(cv);
+                using var form = new MultipartFormDataContent();
 
-            if (createdCv == null) return NotFound("User Not Found");
+                // Add the CV file as-is (binary)
+                using var fileStream = cvFile.OpenReadStream();
+                var fileContent = new StreamContent(fileStream);
 
-            // Map Entity → DTO
-            var resultDto = new CvDTO
+                // Set content type
+                var contentType = cvFile.ContentType;
+                if (string.IsNullOrEmpty(contentType))
+                {
+                    contentType = cvFile.FileName.EndsWith(".pdf", StringComparison.OrdinalIgnoreCase)
+                        ? "application/pdf"
+                        : "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
+                }
+
+                fileContent.Headers.ContentType = MediaTypeHeaderValue.Parse(contentType);
+
+                // Add file with field name "cvFile"
+                form.Add(fileContent, "cvFile", cvFile.FileName);
+
+                // Add job description as plain text with field name "jobDescription"
+                form.Add(new StringContent(jobDescription), "jobDescription");
+
+                // Send to n8n webhook
+                var n8nWebhookUrl = "https://n8nfatima.ddns.net/webhook/resume-evaluator";
+                var response = await client.PostAsync(n8nWebhookUrl, form);
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    var errorContent = await response.Content.ReadAsStringAsync();
+                    return StatusCode((int)response.StatusCode,
+                        new { message = "Failed to process CV through n8n", details = errorContent });
+                }
+
+                var analysisJson = await response.Content.ReadAsStringAsync();
+
+                // Try to parse the JSON to return structured data
+                try
+                {
+                    var analysisResult = JsonConvert.DeserializeObject<dynamic>(analysisJson);
+                    return Ok(new { success = true, analysis = analysisResult });
+                }
+                catch
+                {
+                    // If parsing fails, return raw JSON
+                    return Ok(new { success = true, analysis = analysisJson });
+                }
+            }
+            catch (Exception ex)
             {
-
-                FileUrl = "/files/" + createdCv.FileUrl,
-                JobSeekerId = createdCv.JobSeekerId
-            };
-
-            return Ok(resultDto);
+                return StatusCode(500, new { message = "Error processing CV", error = ex.Message });
+            }
         }
-
-
-        [HttpDelete("{cvId}")]
-        public async Task<IActionResult> DeleteCv(int cvId)
-        {
-            bool isSuccessful = await _cvRepository.DeleteCvAsync(cvId);
-
-            if (!isSuccessful)
-                return NotFound($"CV with ID {cvId} not found");
-
-            return NoContent(); // 204 is standard for successful deletion
-        }
-
-
-
     }
 }
