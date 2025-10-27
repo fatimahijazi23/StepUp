@@ -7,7 +7,6 @@ using System.Security.Claims;
 
 namespace aspteamAPI.Controllers
 {
-
     [ApiController]
     [Route("api/[controller]")]
     public class JobsController : ControllerBase
@@ -115,6 +114,7 @@ namespace aspteamAPI.Controllers
             var job = new Job
             {
                 PostedBy = dto.PostedBy,
+                Title = dto.Title,  // ✅ FIXED: Added Title field
                 Description = dto.Description,
                 Requirements = dto.Requirements,
                 Location = dto.Location,
@@ -141,6 +141,7 @@ namespace aspteamAPI.Controllers
             var job = await _jobRepository.GetByIdAsync(jobId);
             if (job == null) return NotFound();
 
+            job.Title = dto.Title;  // ✅ FIXED: Added Title field
             job.Description = dto.Description;
             job.Requirements = dto.Requirements;
             job.Location = dto.Location;
@@ -185,6 +186,7 @@ namespace aspteamAPI.Controllers
             {
                 Id = job.Id,
                 PostedBy = job.PostedBy,
+                Title = job.Title,  // ✅ FIXED: Added Title field
                 Description = job.Description,
                 Requirements = job.Requirements,
                 Location = job.Location,
@@ -220,8 +222,4 @@ namespace aspteamAPI.Controllers
 
        
     }
-
-
-
-
 }

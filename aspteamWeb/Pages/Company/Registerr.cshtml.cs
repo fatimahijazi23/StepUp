@@ -1,12 +1,14 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using System.ComponentModel.DataAnnotations;
+using Microsoft.Data.SqlClient;
 
-namespace teamProject.WEB.Pages.Company
-{ 
+namespace aspteamWeb.Pages.Company
+{
     public class RegisterModel : PageModel
     {
         private readonly HttpClient _httpClient;
+        private readonly string connectionString = "Server=DESKTOP-81J6GVU\\SQLEXPRESS;Database=SetUp;Trusted_Connection=True;MultipleActiveResultSets=true;TrustServerCertificate=True";
 
         public RegisterModel(HttpClient httpClient)
         {
@@ -38,95 +40,151 @@ namespace teamProject.WEB.Pages.Company
             public string CompanyName { get; set; } = string.Empty;
 
             [Required]
+            [Display(Name = "Industry")]
             public string Industry { get; set; } = string.Empty;
 
-            // REMOVE CompanySize since your API doesn't expect it
-            // If you need it, add it to your RegisterCompanyDto first
+            [Required]
+            [Display(Name = "Company Size")]
+            public string CompanySize { get; set; } = string.Empty;
+        }
+
+        public class AuthResponse
+        {
+            public int UserId { get; set; }
+            public string Role { get; set; } = string.Empty;
+            public string Token { get; set; } = string.Empty;
         }
 
         public void OnGet()
         {
-            // Initialize if needed
         }
 
         public async Task<IActionResult> OnPostAsync()
         {
             if (!ModelState.IsValid)
-            {
-                Console.WriteLine("❌ Razor Page ModelState is invalid:");
-                foreach (var error in ModelState)
-                {
-                    Console.WriteLine($"   {error.Key}: {string.Join(", ", error.Value.Errors.Select(e => e.ErrorMessage))}");
-                }
                 return Page();
-            }
 
             try
             {
                 var apiUrl = "https://localhost:7289/api/Auth/register-company";
 
-                // CRITICAL FIX: Make sure Industry matches your enum exactly
-                Console.WriteLine($"🔍 Input Industry string: '{Input.Industry}'");
-
-                // List your exact Industry enum values here:
-                var validIndustries = Enum.GetNames(typeof(Industry));
-                Console.WriteLine($"🔍 Valid industries: {string.Join(", ", validIndustries)}");
-
-                if (!Enum.TryParse<Industry>(Input.Industry, true, out var industryEnum))
-                {
-                    Console.WriteLine($"❌ Failed to parse industry: '{Input.Industry}'");
-                    ModelState.AddModelError(string.Empty, $"Invalid industry: {Input.Industry}");
-                    return Page();
-                }
-
-                Console.WriteLine($"✅ Parsed industry enum: {industryEnum}");
-
-                // Create the exact DTO that matches your RegisterCompanyDto
-                var dto = new
+                var payload = new
                 {
                     CompanyName = Input.CompanyName?.Trim(),
                     Email = Input.Email?.Trim(),
                     Password = Input.Password,
                     ConfirmPassword = Input.ConfirmPassword,
-                    Industry = industryEnum
-                    // NOTE: Removed CompanySize since your API doesn't expect it
+                    Industry = ConvertIndustryToEnum(Input.Industry),
+                    CompanySize = ConvertCompanySizeToInt(Input.CompanySize)
                 };
 
-                Console.WriteLine($"🌐 Sending DTO: CompanyName='{dto.CompanyName}', Email='{dto.Email}', Industry='{dto.Industry}'");
-
-                var jsonContent = System.Text.Json.JsonSerializer.Serialize(dto);
-                Console.WriteLine($"🌐 JSON being sent: {jsonContent}");
-
-                var response = await _httpClient.PostAsJsonAsync(apiUrl, dto);
-                var responseContent = await response.Content.ReadAsStringAsync();
-
-                Console.WriteLine($"🌐 Response Status: {response.StatusCode}");
-                Console.WriteLine($"🌐 Response Content: {responseContent}");
+                var response = await _httpClient.PostAsJsonAsync(apiUrl, payload);
 
                 if (response.IsSuccessStatusCode)
                 {
-                    TempData["SuccessMessage"] = "Company account created successfully! Please log in.";
-                    return RedirectToPage("/Login");
+                    var result = await response.Content.ReadFromJsonAsync<AuthResponse>();
+
+                    if (result != null)
+                    {
+                        // ✅ FETCH CompanyId FROM DATABASE (Same as Login does)
+                        int companyId = GetCompanyIdFromDatabase(result.UserId);
+
+                        if (companyId > 0)
+                        {
+                            // Store ALL session data
+                            HttpContext.Session.SetInt32("UserId", result.UserId);
+                            HttpContext.Session.SetInt32("CompanyId", companyId); // ✅ THIS IS THE FIX!
+                            HttpContext.Session.SetString("Token", result.Token);
+                            HttpContext.Session.SetString("Role", result.Role);
+                            HttpContext.Session.SetString("UserType", "Company");
+                            HttpContext.Session.SetString("UserEmail", Input.Email);
+
+                            TempData["SuccessMessage"] = "Account created successfully! Complete your profile.";
+                            return RedirectToPage("/Company/ProfileCompany");
+                        }
+                        else
+                        {
+                            ModelState.AddModelError(string.Empty, "Account created but company profile not found. Please login.");
+                            return Page();
+                        }
+                    }
                 }
-                else
-                {
-                    Console.WriteLine($"❌ API call failed with status: {response.StatusCode}");
-                    ModelState.AddModelError(string.Empty, $"Registration failed: {responseContent}");
-                }
+
+                var errorContent = await response.Content.ReadAsStringAsync();
+                ModelState.AddModelError(string.Empty, $"Registration failed: {errorContent}");
             }
             catch (HttpRequestException ex)
             {
-                Console.WriteLine($"❌ HTTP Error: {ex.Message}");
                 ModelState.AddModelError(string.Empty, $"Connection error: {ex.Message}");
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"❌ Unexpected error: {ex.Message}");
-                Console.WriteLine($"❌ Stack trace: {ex.StackTrace}");
                 ModelState.AddModelError(string.Empty, $"An error occurred: {ex.Message}");
             }
 
             return Page();
+        }
+
+        // ✅ Get CompanyId from database using UserId (Same logic as Login)
+        private int GetCompanyIdFromDatabase(int userId)
+        {
+            try
+            {
+                using (SqlConnection connection = new SqlConnection(connectionString))
+                {
+                    connection.Open();
+
+                    string sql = "SELECT Id FROM CompanyAccounts WHERE UserId = @UserId";
+
+                    using (SqlCommand command = new SqlCommand(sql, connection))
+                    {
+                        command.Parameters.AddWithValue("@UserId", userId);
+
+                        var result = command.ExecuteScalar();
+                        if (result != null)
+                        {
+                            return Convert.ToInt32(result);
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                // Log error if needed
+                Console.WriteLine($"Error fetching CompanyId: {ex.Message}");
+            }
+
+            return 0;
+        }
+
+        private int ConvertIndustryToEnum(string industry)
+        {
+            return industry switch
+            {
+                "Technology" => 0,
+                "Healthcare" => 1,
+                "Finance" => 2,
+                "Education" => 3,
+                "Manufacturing" => 4,
+                "Retail" => 5,
+                "Consulting" => 6,
+                "RealEstate" => 7,
+                "Other" => 8,
+                _ => 8
+            };
+        }
+
+        private int ConvertCompanySizeToInt(string companySize)
+        {
+            return companySize switch
+            {
+                "1-10" => 10,
+                "11-50" => 50,
+                "51-200" => 200,
+                "201-500" => 500,
+                "500+" => 1000,
+                _ => 10
+            };
         }
     }
 }

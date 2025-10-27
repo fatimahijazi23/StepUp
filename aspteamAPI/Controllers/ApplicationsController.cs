@@ -244,6 +244,22 @@ namespace aspteamAPI.Controllers
             }
         }
 
+
+
+        [HttpGet("job/{jobId}/count")]
+        public async Task<IActionResult> GetJobApplicantCount(int jobId)
+        {
+            try
+            {
+                var count = await _jobApplicationRepo.GetJobApplicantCountAsync(jobId);
+                return Ok(new { JobId = jobId, ApplicantCount = count, Success = true });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { Success = false, Message = "Error getting count" });
+            }
+        }
+
         // POST /api/applications/{applicationId}/reject - Reject application
         [HttpPost("{applicationId}/reject")]
         public async Task<IActionResult> RejectApplication(int applicationId, [FromBody] UpdateApplicationStatusDto? dto = null)

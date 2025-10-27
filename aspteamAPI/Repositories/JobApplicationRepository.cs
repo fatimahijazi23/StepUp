@@ -14,7 +14,10 @@ namespace aspteamAPI.Repositories
         {
             _context = context;
         }
-
+        public async Task<int> GetJobApplicantCountAsync(int jobId)
+        {
+            return await _context.JobApplications.Where(a => a.JobId == jobId).CountAsync();
+        }
         public async Task<ApiResponseDto<JobApplicationResponseDto>> CreateApplicationAsync(CreateJobApplicationDto dto, int userId)
         {
             try

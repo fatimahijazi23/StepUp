@@ -51,15 +51,12 @@
                         <p class="section-content">@Model.Job.Requirements</p>
                     </div>
 
-                    <!-- Benefits Section -->
-                    <div class="job-section mb-4">
-                        <h3 class="section-title">Benefits</h3>
-                        <p class="section-content">@Model.Job.Benefits</p>
-                    </div>
+                 
+
 
                     <!-- View Applicants Button -->
                     <div class="mt-4">
-                        <a asp-page="/Applicants/Index" asp-route-jobId="@Model.Job.Id" class="btn btn-primary btn-applicants">
+                        <a asp-page="/Company/ViewApplicants" asp-route-jobId="@Model.Job.Id" class="btn btn-primary btn-applicants">
                             <i class="bi bi-people"></i> View Applicants (@Model.ApplicantCount)
                         </a>
                     </div>

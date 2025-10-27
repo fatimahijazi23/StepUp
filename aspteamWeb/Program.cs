@@ -3,8 +3,9 @@ using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.EntityFrameworkCore;
 using System;
 
-
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddRazorPages();
 builder.Services.AddHttpClient();
 
 // Add services to the container.
@@ -24,20 +25,20 @@ builder.Services.AddSession(options =>
 var app = builder.Build();
 app.UseSession();
 
-// Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Error");
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();
-
 app.UseRouting();
 
-app.UseAuthorization();
+// ADD THIS - Use Session (must be before UseAuthorization)
+app.UseSession();
 
+app.UseAuthorization();
 app.MapRazorPages();
+
 app.Run();
