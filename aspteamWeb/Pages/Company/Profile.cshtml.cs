@@ -8,7 +8,7 @@ using System.Text.Json.Serialization;
 
 namespace aspteamWeb.Pages.Company
 {
-    public class ProfileCompanyModel : PageModel
+    public class ProfileModel : PageModel
     {
         private readonly HttpClient _httpClient;
         private readonly IWebHostEnvironment _environment;

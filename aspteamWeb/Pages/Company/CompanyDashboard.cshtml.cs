@@ -21,7 +21,7 @@ namespace aspteamWeb.Pages.Company
         public List<JobPosting> Jobs { get; set; } = new();
         public string ErrorMessage { get; set; }
 
-        public async Task OnGetAsync()
+        public async Task<IActionResult> OnGetAsync()
         {
             try
             {
@@ -30,8 +30,8 @@ namespace aspteamWeb.Pages.Company
 
                 if (companyId == null)
                 {
-                    ErrorMessage = "Please log in to view your jobs.";
-                    return;
+                    // Redirect to Company login page, not /Account/Login
+                    return RedirectToPage("/Company/Login");
                 }
 
                 // Call API to get jobs for this company
@@ -67,11 +67,14 @@ namespace aspteamWeb.Pages.Company
                     _logger.LogWarning("Failed to load jobs. Status: {Status}", response.StatusCode);
                     ErrorMessage = "Failed to load jobs.";
                 }
+
+                return Page();
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error loading company jobs");
                 ErrorMessage = $"An error occurred: {ex.Message}";
+                return Page();
             }
         }
 
@@ -82,7 +85,8 @@ namespace aspteamWeb.Pages.Company
                 var companyId = HttpContext.Session.GetInt32("CompanyId");
                 if (companyId == null)
                 {
-                    return RedirectToPage("/Account/Login");
+                    // FIXED: Use correct login path
+                    return RedirectToPage("/Company/Login");
                 }
 
                 var apiUrl = _configuration["ApiUrl"] ?? "https://localhost:7289/api";

@@ -1,4 +1,8 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿
+
+
+
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Data.SqlClient;
 using System.Security.Cryptography;
@@ -123,3 +127,14 @@ namespace aspteamWeb.Pages.Company
         }
     }
 }
+
+
+
+
+
+
+
+
+
+
+
