@@ -20,7 +20,7 @@ namespace aspteamWeb.Pages.Company
 
         public string ErrorMessage { get; set; }
 
-        private readonly string connectionString = "Server=DESKTOP-81J6GVU\\SQLEXPRESS;Database=SetUp;Trusted_Connection=True;MultipleActiveResultSets=true;TrustServerCertificate=True";
+        private readonly string connectionString = "Server=LAPTOP-8MT5CR5T\\SQLSERVER;Database=SetUp;Trusted_Connection=True;MultipleActiveResultSets=true;TrustServerCertificate=True";
 
         public void OnGet()
         {
@@ -100,30 +100,30 @@ namespace aspteamWeb.Pages.Company
         private bool VerifyPassword(string password, string storedHash)
         {
             try
-            {
-                // Split the stored hash to get salt and hash
-                var parts = storedHash.Split(':');
-                if (parts.Length != 2) return false;
+{
+    // Split the stored hash to get salt and hash
+    var parts = storedHash.Split(':');
+    if (parts.Length != 2) return false;
 
-                var salt = Convert.FromBase64String(parts[0]);
-                var hash = parts[1];
+    var salt = Convert.FromBase64String(parts[0]);
+    var hash = parts[1];
 
-                // Hash the provided password with the same salt
-                string computedHash = Convert.ToBase64String(KeyDerivation.Pbkdf2(
-                    password: password,
-                    salt: salt,
-                    prf: KeyDerivationPrf.HMACSHA256,
-                    iterationCount: 10000,
-                    numBytesRequested: 256 / 8
-                ));
+    // Hash the provided password with the same salt
+    string computedHash = Convert.ToBase64String(KeyDerivation.Pbkdf2(
+        password: password,
+        salt: salt,
+        prf: KeyDerivationPrf.HMACSHA256,
+        iterationCount: 10000,
+        numBytesRequested: 256 / 8
+    ));
 
-                // Compare the hashes
-                return hash == computedHash;
-            }
-            catch
-            {
-                return false;
-            }
+    // Compare the hashes
+    return hash == computedHash;
+}
+catch
+{
+    return false;
+}
         }
     }
 }

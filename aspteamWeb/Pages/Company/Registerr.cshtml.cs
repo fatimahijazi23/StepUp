@@ -8,7 +8,7 @@ namespace aspteamWeb.Pages.Company
     public class RegisterModel : PageModel
     {
         private readonly HttpClient _httpClient;
-        private readonly string connectionString = "Server=DESKTOP-81J6GVU\\SQLEXPRESS;Database=SetUp;Trusted_Connection=True;MultipleActiveResultSets=true;TrustServerCertificate=True";
+        private readonly string connectionString = "Server=LAPTOP-8MT5CR5T\\SQLSERVER;Database=SetUp;Trusted_Connection=True;MultipleActiveResultSets=true;TrustServerCertificate=True";
 
         public RegisterModel(HttpClient httpClient)
         {
