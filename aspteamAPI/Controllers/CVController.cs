@@ -51,7 +51,8 @@ namespace aspteamAPI.Controllers
 
         // NEW method for analyzing uploaded file directly
         [HttpPost("analyze-upload")]
-        public async Task<IActionResult> AnalyzeUploadedCv([FromForm] IFormFile cvFile, [FromForm] string jobDescription)
+        [Consumes("multipart/form-data")]  // Add this attribute
+        public async Task<IActionResult> AnalyzeUploadedCv(IFormFile cvFile, string jobDescription)  // Remove [FromForm] attributes
         {
             if (cvFile == null || cvFile.Length == 0)
                 return BadRequest("No file uploaded");

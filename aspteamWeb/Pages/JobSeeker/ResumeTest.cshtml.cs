@@ -25,7 +25,7 @@ namespace aspteamWeb.Pages.JobSeeker
         public dynamic? AnalysisResult { get; set; }
         public bool ShowResults { get; set; } = false;
 
-        public async Task<IActionResult> OnGetAsync(int jobId)
+        public async Task<IActionResult> OnGetAsync(int id)  // Changed from jobId to id
         {
             try
             {
@@ -39,7 +39,7 @@ namespace aspteamWeb.Pages.JobSeeker
                 _httpClient.DefaultRequestHeaders.Authorization =
                     new AuthenticationHeaderValue("Bearer", token);
 
-                var apiUrl = $"https://localhost:7289/api/Jobs/{jobId}";
+                var apiUrl = $"https://localhost:7289/api/Jobs/{id}";
                 var responseJob = await _httpClient.GetFromJsonAsync<JobResponse>(apiUrl);
 
                 if (responseJob != null)
@@ -53,9 +53,13 @@ namespace aspteamWeb.Pages.JobSeeker
 
             return Page();
         }
-
         public async Task<IActionResult> OnPostAsync()
         {
+            Console.WriteLine($"=== OnPostAsync Debug ===");
+            Console.WriteLine($"ResumeFile: {ResumeFile?.FileName ?? "NULL"}");
+            Console.WriteLine($"JobDescription: {JobDescription ?? "NULL"}");
+            Console.WriteLine($"JobDescription Length: {JobDescription?.Length ?? 0}");
+
             if (ResumeFile == null || ResumeFile.Length == 0)
             {
                 ResultMessage = "⚠️ Please upload a resume file.";
@@ -77,7 +81,6 @@ namespace aspteamWeb.Pages.JobSeeker
                         new AuthenticationHeaderValue("Bearer", token);
                 }
 
-                // Prepare multipart form data
                 using var form = new MultipartFormDataContent();
 
                 // Add file
@@ -86,32 +89,35 @@ namespace aspteamWeb.Pages.JobSeeker
                 fileContent.Headers.ContentType = new MediaTypeHeaderValue(ResumeFile.ContentType);
                 form.Add(fileContent, "cvFile", ResumeFile.FileName);
 
-                // Add job description
-                form.Add(new StringContent(JobDescription), "jobDescription");
+                // Add job description - make sure it's not empty
+                var jobDescContent = new StringContent(JobDescription ?? string.Empty);
+                form.Add(jobDescContent, "jobDescription");
 
-                // Call API
+                Console.WriteLine($"Sending to API with jobDescription: {JobDescription?.Substring(0, Math.Min(50, JobDescription.Length))}...");
+
                 var apiUrl = "https://localhost:7289/api/Cv/analyze-upload";
                 var response = await _httpClient.PostAsync(apiUrl, form);
 
+                var responseContent = await response.Content.ReadAsStringAsync();
+                Console.WriteLine($"API Response Status: {response.StatusCode}");
+                Console.WriteLine($"API Response: {responseContent}");
+
                 if (response.IsSuccessStatusCode)
                 {
-                    var jsonResponse = await response.Content.ReadAsStringAsync();
-                    var result = JsonConvert.DeserializeObject<dynamic>(jsonResponse);
-
+                    var result = JsonConvert.DeserializeObject<dynamic>(responseContent);
                     AnalysisResult = result?.analysis;
                     ShowResults = true;
                     ResultMessage = $"✅ Your resume '{ResumeFile.FileName}' was analyzed successfully!";
                 }
                 else
                 {
-                    var errorContent = await response.Content.ReadAsStringAsync();
-                    ResultMessage = $"⚠️ Error analyzing resume: {errorContent}";
+                    ResultMessage = $"⚠️ Error analyzing resume: {responseContent}";
                 }
             }
             catch (Exception ex)
             {
                 ResultMessage = $"⚠️ Error: {ex.Message}";
-                Console.WriteLine($"Error analyzing CV: {ex}");
+                Console.WriteLine($"Exception in OnPostAsync: {ex}");
             }
 
             return Page();

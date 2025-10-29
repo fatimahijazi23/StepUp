@@ -11,7 +11,7 @@
         <div class="avatar mb-2">
             @if (!string.IsNullOrEmpty(Model.Input.ProfilePictureUrl))
             {
-                <img src="@Model.Input.ProfilePictureUrl" class="rounded-circle" style="width:80px; height:80px; object-fit:cover;" />
+                <img src="@Model.Input.ProfilePictureUrl" class="rounded-circle" style="width:120px; height:120px; object-fit:cover;" />
             }
             else
             {
@@ -37,7 +37,6 @@
 
         <!-- Buttons -->
         <button class="btn btn-edit mt-2" type="button" onclick="toggleForm()">Edit Profile</button>
-     
 
         <!-- Edit Form -->
         <div id="editForm" class="mt-4 d-none">
@@ -73,88 +72,235 @@
     </div>
 
     <!-- Followed Companies Section -->
-   
-        <div class="container mt-4">
-            @if (Model.FollowedCompanies.Any())
-            {
-                <div class="row">
-                    @foreach (var company in Model.FollowedCompanies)
-                    {
-                        <div class="col-md-5 m-2">
-                            <div class="card shadow-sm p-3 rounded-4 border-0">
-                                <h5>@company.CompanyName</h5>
-                                <p>@company.Industry</p>
-                                <p>@company.About</p>
-                                <form method="post" asp-page-handler="Unfollow">
-                                    <input type="hidden" name="companyId" value="@company.Id" />
-                                    <button type="submit" class="btn btn-outline-danger btn-sm">Unfollow</button>
-                                </form>
-                          
-                            </div>
+    <div class="container mt-4">
+        @if (Model.FollowedCompanies.Any())
+        {
+            <div class="row">
+                @foreach (var company in Model.FollowedCompanies)
+                {
+                    <div class="col-md-6 mb-3">
+                        <div class="company-card">
+                            <h5>@company.CompanyName</h5>
+                            <p class="industry-badge"><span class="badge-facebook">@company.Industry</span></p>
+                            <p class="company-about">@company.About</p>
+                            <form method="post" asp-page-handler="Unfollow">
+                                <input type="hidden" name="companyId" value="@company.Id" />
+                                <button type="submit" class="btn btn-outline-danger btn-sm">Unfollow</button>
+                            </form>
                         </div>
-                    }
-                </div>
-            }
-            else
-            {
-                <div class="text-center text-muted">You’re not following any companies yet.</div>
-            }
-        </div>
-    
-
+                    </div>
+                }
+            </div>
+        }
+        else
+        {
+            <div class="text-center text-muted mt-4">You're not following any companies yet.</div>
+        }
+    </div>
 </div>
 
 @section Styles {
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
     <style>
+        :root {
+            --facebook-blue: #1877f2;
+            --facebook-blue-hover: #166fe5;
+            --facebook-blue-light: #e7f3ff;
+            --facebook-bg: #f0f2f5;
+            --facebook-white: #ffffff;
+            --facebook-gray: #65676b;
+            --facebook-gray-light: #e4e6eb;
+            --facebook-text: #050505;
+            --facebook-text-secondary: #65676b;
+            --facebook-border: #dddfe2;
+            --facebook-success: #42b72a;
+            --facebook-danger: #e4335b;
+            --shadow-md: 0 2px 4px rgba(0, 0, 0, 0.1);
+            --shadow-lg: 0 8px 16px rgba(0, 0, 0, 0.1);
+        }
+
         body {
-            background-color: #f4f8fc;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--facebook-bg);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
         }
 
         .profile-card {
-            background: #fff;
-            border-radius: 12px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-            padding: 30px;
+            background: var(--facebook-white);
+            border-radius: 8px;
+            box-shadow: var(--shadow-md);
+            padding: 40px;
             margin-top: 40px;
-            max-width: 400px;
+            max-width: 500px;
             margin-left: auto;
             margin-right: auto;
+            border: 1px solid var(--facebook-border);
         }
 
+        .avatar {
+            width: 120px;
+            height: 120px;
+            margin: 0 auto 20px;
+        }
+
+            .avatar img {
+                width: 120px;
+                height: 120px;
+                border-radius: 50%;
+                object-fit: cover;
+                border: 4px solid var(--facebook-blue);
+            }
+
         .avatar-placeholder {
-            background-color: #ccc;
+            background-color: var(--facebook-gray-light);
             border-radius: 50%;
-            width: 80px;
-            height: 80px;
+            width: 120px;
+            height: 120px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 14px;
-            color: #555;
+            font-size: 18px;
+            color: var(--facebook-gray);
             margin: 0 auto;
+            border: 4px solid var(--facebook-border);
+        }
+
+        .profile-card h4 {
+            color: var(--facebook-text);
+            font-weight: 700;
+            font-size: 24px;
+            margin-bottom: 8px;
+        }
+
+        .profile-card p {
+            color: var(--facebook-text-secondary);
+            font-size: 15px;
+            margin-bottom: 8px;
         }
 
         .btn-edit {
-            background-color: #0d6efd;
+            background-color: var(--facebook-blue);
             color: #fff;
-            font-weight: 500;
+            font-weight: 600;
+            border: none;
+            border-radius: 6px;
+            padding: 10px 20px;
+            font-size: 15px;
+            transition: background-color 0.2s ease;
         }
 
-        .card {
-            border-radius: 12px;
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
-        }
-
-            .card:hover {
-                transform: translateY(-4px);
-                box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+            .btn-edit:hover {
+                background-color: var(--facebook-blue-hover);
             }
 
-        .btn-outline-danger {
+        .btn-primary {
+            background-color: var(--facebook-blue);
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            padding: 10px 20px;
+            font-weight: 600;
+            font-size: 15px;
+        }
+
+            .btn-primary:hover {
+                background-color: var(--facebook-blue-hover);
+            }
+
+        .form-label {
+            color: var(--facebook-text);
+            font-weight: 600;
+            font-size: 14px;
+            margin-bottom: 8px;
+        }
+
+        .form-control {
+            border: 1px solid var(--facebook-border);
+            border-radius: 6px;
+            padding: 10px 12px;
+            font-size: 15px;
+            transition: border-color 0.2s ease;
+        }
+
+            .form-control:focus {
+                border-color: var(--facebook-blue);
+                box-shadow: 0 0 0 2px var(--facebook-blue-light);
+                outline: none;
+            }
+
+        .company-card {
+            background: var(--facebook-white);
             border-radius: 8px;
-            font-weight: 500;
+            box-shadow: var(--shadow-md);
+            padding: 20px;
+            border: 1px solid var(--facebook-border);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            height: 100%;
+        }
+
+            .company-card:hover {
+                transform: translateY(-4px);
+                box-shadow: var(--shadow-lg);
+            }
+
+            .company-card h5 {
+                color: var(--facebook-text);
+                font-weight: 700;
+                font-size: 18px;
+                margin-bottom: 12px;
+            }
+
+        .badge-facebook {
+            background-color: var(--facebook-blue-light);
+            color: var(--facebook-blue);
+            padding: 6px 12px;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 13px;
+            display: inline-block;
+        }
+
+        .company-about {
+            color: var(--facebook-text-secondary);
+            font-size: 14px;
+            margin-bottom: 16px;
+        }
+
+        .btn-outline-danger {
+            background-color: transparent;
+            color: var(--facebook-danger);
+            border: 1px solid var(--facebook-danger);
+            border-radius: 6px;
+            padding: 8px 16px;
+            font-weight: 600;
+            font-size: 14px;
+            transition: all 0.2s ease;
+        }
+
+            .btn-outline-danger:hover {
+                background-color: var(--facebook-danger);
+                color: var(--facebook-white);
+                border-color: var(--facebook-danger);
+            }
+
+        .alert {
+            border-radius: 8px;
+            border: none;
+            padding: 12px 16px;
+            font-size: 14px;
+        }
+
+        .alert-success {
+            background-color: #e7f6e7;
+            color: var(--facebook-success);
+        }
+
+        .alert-danger {
+            background-color: #ffe9ec;
+            color: var(--facebook-danger);
+        }
+
+        .text-muted {
+            color: var(--facebook-text-secondary) !important;
         }
     </style>
 }
