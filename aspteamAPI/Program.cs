@@ -5,8 +5,8 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using aspteamAPI.IRepository;
 using Microsoft.OpenApi.Models;
-using aspteamAPI;
 using aspteamAPI.Middleware;
+using aspteamAPI;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -15,14 +15,9 @@ builder.Services.AddDbContext<aspteamAPI.context.AppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("conn")));
 
 // Register Repository
-
-
 builder.Services.AddScoped<IJobRepository, JobRepository>();
-
 builder.Services.AddScoped<IJobApplicationRepository, JobApplicationRepository>();
 builder.Services.AddScoped<IAuthRepositories, AuthRepository>();
-//builder.Services.AddScoped<IEmailService, EmailService>();
-// In Program.cs:
 builder.Services.AddScoped<IEmailService, MockEmailService>();
 builder.Services.AddScoped<IJobSeekerRepository, JobSeekerRepository>();
 builder.Services.AddScoped<IJobSeekerProfileRepo, JobSeekerProfileRepository>();
@@ -33,12 +28,13 @@ builder.Services.AddScoped<ICvRepository, CvRepository>();
 // Add Controllers
 builder.Services.AddControllers();
 
-// Swagger
+// Swagger - ONLY ONE AddSwaggerGen call
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
 builder.Services.AddSwaggerGen(c =>
 {
     c.SwaggerDoc("v1", new OpenApiInfo { Title = "aspteamAPI", Version = "v1" });
+
+    // Removed: c.OperationFilter<aspteamAPI.FileUploadOperation>();
 
     // Add JWT Authentication to Swagger
     c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
@@ -49,7 +45,6 @@ builder.Services.AddSwaggerGen(c =>
         Type = SecuritySchemeType.ApiKey,
         Scheme = "Bearer"
     });
-
     c.AddSecurityRequirement(new OpenApiSecurityRequirement
     {
         {
@@ -65,6 +60,7 @@ builder.Services.AddSwaggerGen(c =>
         }
     });
 });
+
 // JWT Authentication
 builder.Services.AddAuthentication(options =>
 {
@@ -96,10 +92,8 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-
-app.UseAuthentication(); // ✅ Add Authentication before Authorization
-app.UseMiddleware<TokenBlacklistMiddleware>(); 
-
+app.UseAuthentication();
+app.UseMiddleware<TokenBlacklistMiddleware>();
 app.UseAuthorization();
 
 app.MapControllers();

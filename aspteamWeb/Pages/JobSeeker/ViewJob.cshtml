@@ -3,42 +3,103 @@
 @{
     ViewData["Title"] = "Job Details";
 }
-
 <div class="container mt-5">
     @if (Model.Job == null)
     {
-        <div class="alert alert-danger">Job not found.</div>
+        <div class="alert alert-danger custom-alert">
+            <i class="bi bi-exclamation-triangle-fill"></i>
+            <span>Job not found.</span>
+        </div>
     }
     else
     {
         <div class="card shadow-sm p-4 job-detail-card">
-            <h3 class="fw-bold">@Model.Job.Title</h3>
-            <p class="text-primary fw-semibold">@Model.Job.CompanyName</p>
-
-            <div class="d-flex flex-wrap text-muted mb-3">
-                <div class="me-3"><i class="bi bi-geo-alt"></i> @Model.Job.Location</div>
-                <div class="me-3"><i class="bi bi-briefcase"></i> @Model.Job.Type</div>
-                <div class="me-3"><i class="bi bi-diagram-3"></i> @Model.Job.Level</div>
-                <div class="me-3"><i class="bi bi-clock"></i> Posted @Model.Job.PostedAt.ToString("MMM dd, yyyy")</div>
-                <div class="me-3"><i class="bi bi-currency-dollar"></i> @Model.Job.SalaryRange</div>
+            <!-- Header Section -->
+            <div class="job-header-section">
+                <h3 class="fw-bold job-title">@Model.Job.Title</h3>
+                <div class="company-badge">
+                    <i class="bi bi-building-fill"></i>
+                    <p class="text-primary fw-semibold mb-0">@Model.Job.CompanyName</p>
+                </div>
             </div>
 
-            <hr />
+            <!-- Meta Information -->
+            <div class="job-meta-container">
+                <div class="meta-item">
+                    <i class="bi bi-geo-alt-fill"></i>
+                    <div class="meta-content">
+                        <span class="meta-label">Location</span>
+                        <span class="meta-value">@Model.Job.Location</span>
+                    </div>
+                </div>
+                <div class="meta-item">
+                    <i class="bi bi-briefcase-fill"></i>
+                    <div class="meta-content">
+                        <span class="meta-label">Type</span>
+                        <span class="meta-value">@Model.Job.Type</span>
+                    </div>
+                </div>
+                <div class="meta-item">
+                    <i class="bi bi-diagram-3-fill"></i>
+                    <div class="meta-content">
+                        <span class="meta-label">Level</span>
+                        <span class="meta-value">@Model.Job.Level</span>
+                    </div>
+                </div>
+                <div class="meta-item">
+                    <i class="bi bi-clock-fill"></i>
+                    <div class="meta-content">
+                        <span class="meta-label">Posted</span>
+                        <span class="meta-value">@Model.Job.PostedAt.ToString("MMM dd, yyyy")</span>
+                    </div>
+                </div>
+                <div class="meta-item">
+                    <i class="bi bi-currency-dollar"></i>
+                    <div class="meta-content">
+                        <span class="meta-label">Salary</span>
+                        <span class="meta-value">@Model.Job.SalaryRange</span>
+                    </div>
+                </div>
+            </div>
 
-            <h5 class="fw-bold">Job Description</h5>
-            <p>@Model.Job.Description</p>
+            <div class="section-divider"></div>
 
-            <h5 class="fw-bold">Requirements</h5>
-            <p>@Model.Job.Requirements</p>
+            <!-- Job Description -->
+            <div class="content-section">
+                <div class="section-header">
+                    <i class="bi bi-file-text-fill"></i>
+                    <h5 class="fw-bold">Job Description</h5>
+                </div>
+                <p class="section-text">@Model.Job.Description</p>
+            </div>
 
-            <h5 class="fw-bold">Benefits</h5>
-            <p>@Model.Job.Benefits</p>
+            <!-- Requirements -->
+            <div class="content-section">
+                <div class="section-header">
+                    <i class="bi bi-list-check"></i>
+                    <h5 class="fw-bold">Requirements</h5>
+                </div>
+                <p class="section-text">@Model.Job.Requirements</p>
+            </div>
 
-            <hr />
+            <!-- Benefits -->
+            <div class="content-section">
+                <div class="section-header">
+                    <i class="bi bi-gift-fill"></i>
+                    <h5 class="fw-bold">Benefits</h5>
+                </div>
+                <p class="section-text">@Model.Job.Benefits</p>
+            </div>
 
-            <a asp-page="/JobSeeker/ResumeTest" class="btn btn-primary">
-                <i class="bi bi-file-earmark-text"></i> Test Resume
-            </a>
+            <div class="section-divider"></div>
+
+            <!-- Action Button -->
+            <div class="action-container">
+                <a asp-page="/JobSeeker/ResumeTest" class="btn btn-primary enhanced-btn">
+                    <i class="bi bi-file-earmark-text"></i>
+                    <span>Test Resume</span>
+                </a>
+            </div>
         </div>
     }
 </div>
@@ -47,23 +108,245 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" />
     <style>
+        :root {
+            --primary-blue: #0d6efd;
+            --dark-blue: #0a58ca;
+            --light-blue: #e7f1ff;
+            --accent-blue: #3d8bfd;
+            --white: #ffffff;
+            --light-gray: #f8faff;
+            --border-gray: #e8ecf4;
+            --text-dark: #1a1d29;
+            --text-muted: #6c757d;
+        }
+
         body {
-            background-color: #f8faff;
+            background: linear-gradient(135deg, #f8faff 0%, #e7f1ff 100%);
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            min-height: 100vh;
         }
 
-        .job-detail-card {
+        .container {
+            max-width: 900px;
+        }
+
+        /* Alert Styling */
+        .custom-alert {
             border-radius: 12px;
-            background: #fff;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            border: 1px solid #dc3545;
+            background: #fff5f5;
+            padding: 16px 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-weight: 600;
         }
 
-        .job-detail-card h3 {
-            color: #0d6efd;
+            .custom-alert i {
+                font-size: 1.5rem;
+                color: #dc3545;
+            }
+
+        /* Card Styling */
+        .job-detail-card {
+            border-radius: 16px;
+            background: var(--white);
+            box-shadow: 0 8px 24px rgba(13, 110, 253, 0.08);
+            border: 1px solid var(--border-gray);
+            transition: box-shadow 0.3s ease;
+            overflow: hidden;
         }
 
-        .job-detail-card h5 {
-            margin-top: 20px;
+            .job-detail-card:hover {
+                box-shadow: 0 12px 32px rgba(13, 110, 253, 0.12);
+            }
+
+        /* Header Section */
+        .job-header-section {
+            background: linear-gradient(135deg, var(--light-blue) 0%, var(--white) 100%);
+            padding: 24px;
+            margin: -1rem -1rem 0 -1rem;
+            border-bottom: 3px solid var(--primary-blue);
+        }
+
+        .job-title {
+            color: var(--primary-blue);
+            font-size: 2rem;
+            margin-bottom: 16px;
+            line-height: 1.3;
+        }
+
+        .company-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            background: var(--white);
+            padding: 10px 20px;
+            border-radius: 24px;
+            box-shadow: 0 4px 12px rgba(13, 110, 253, 0.15);
+            border: 1px solid var(--border-gray);
+        }
+
+            .company-badge i {
+                font-size: 1.2rem;
+                color: var(--primary-blue);
+            }
+
+            .company-badge p {
+                font-size: 1.1rem;
+            }
+
+        /* Meta Container */
+        .job-meta-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 16px;
+            margin-top: 24px;
+            margin-bottom: 8px;
+        }
+
+        .meta-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: var(--light-blue);
+            padding: 14px 16px;
+            border-radius: 12px;
+            border: 1px solid var(--border-gray);
+            transition: all 0.3s ease;
+        }
+
+            .meta-item:hover {
+                border-color: var(--primary-blue);
+                box-shadow: 0 4px 12px rgba(13, 110, 253, 0.15);
+                transform: translateY(-3px);
+            }
+
+            .meta-item i {
+                font-size: 1.5rem;
+                color: var(--primary-blue);
+                min-width: 24px;
+            }
+
+        .meta-content {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .meta-label {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+        }
+
+        .meta-value {
+            font-size: 0.95rem;
+            color: var(--text-dark);
+            font-weight: 600;
+        }
+
+        /* Section Divider */
+        .section-divider {
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--primary-blue), transparent);
+            margin: 32px 0;
+        }
+
+        /* Content Sections */
+        .content-section {
+            margin-bottom: 28px;
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 16px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid var(--light-blue);
+        }
+
+            .section-header i {
+                font-size: 1.5rem;
+                color: var(--primary-blue);
+            }
+
+            .section-header h5 {
+                margin: 0;
+                color: var(--text-dark);
+                font-size: 1.25rem;
+            }
+
+        .section-text {
+            padding-left: 40px;
+            color: var(--text-dark);
+            line-height: 1.8;
+            font-size: 1rem;
+            white-space: pre-wrap;
+            margin: 0;
+        }
+
+        /* Action Container */
+        .action-container {
+            text-align: center;
+            padding-top: 8px;
+        }
+
+        .enhanced-btn {
+            background: linear-gradient(135deg, var(--primary-blue) 0%, var(--accent-blue) 100%);
+            border: none;
+            border-radius: 12px;
+            padding: 14px 36px;
+            font-weight: 600;
+            font-size: 1.1rem;
+            color: var(--white);
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(13, 110, 253, 0.3);
+            text-decoration: none;
+        }
+
+            .enhanced-btn:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 6px 20px rgba(13, 110, 253, 0.4);
+                background: linear-gradient(135deg, var(--dark-blue) 0%, var(--primary-blue) 100%);
+                color: var(--white);
+            }
+
+            .enhanced-btn:active {
+                transform: translateY(0);
+            }
+
+            .enhanced-btn i {
+                font-size: 1.3rem;
+            }
+
+        /* Responsive Design */
+        media (max-width: 768px) {
+            .job-title
+
+        {
+            font-size: 1.5rem;
+        }
+
+        .job-meta-container {
+            grid-template-columns: 1fr;
+        }
+
+        .section-text {
+            padding-left: 0;
+        }
+
+        .enhanced-btn {
+            width: 100%;
+            justify-content: center;
+        }
+
         }
     </style>
 }

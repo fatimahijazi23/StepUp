@@ -1,10 +1,11 @@
 using aspteamAPI.context;
+using aspteamWeb.Pages.JobSeeker;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.EntityFrameworkCore;
 using System;
 
 var builder = WebApplication.CreateBuilder(args);
-
+builder.Services.AddHttpClient<ResumeTestModel>();
 builder.Services.AddRazorPages();
 builder.Services.AddHttpClient();
 
@@ -40,5 +41,6 @@ app.UseSession();
 
 app.UseAuthorization();
 app.MapRazorPages();
+// In aspteamWeb/Program.cs
 
 app.Run();

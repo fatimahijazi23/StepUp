@@ -6,100 +6,607 @@
 }
 
 <div id="job-details-page">
-    <div class="container">
-        <div class="job-details-content" id="job-details-content">
+    <div class="job-container">
+        <!-- Back Button -->
+        <a asp-page="/JobSeeker/JobSeekerDashboard" class="back-button">
+            <i class="fas fa-arrow-left"></i> Back to Jobs
+        </a>
 
+        <div class="job-details-content">
+            <!-- Enhanced Header Section -->
             <div class="job-details-header">
-                <h1>@Model.Job.Title</h1>
-
-                <div class="job-details-company">@Model.Job.CompanyName</div>
-
-                <div class="job-details-meta">
-                    <span><i class="fas fa-map-marker-alt"></i> @Model.Job.Location</span>
-                    <span><i class="fas fa-briefcase"></i> @Model.Job.EmploymentType</span>
-                    <span><i class="fas fa-building"></i> @Model.Job.Industry</span>
-                    <span><i class="fas fa-clock"></i> Posted @Model.Job.CreatedAt.ToShortDateString()</span>
-
-                    @if (Model.Job.MinSalaryRange.HasValue && Model.Job.MaxSalaryRange.HasValue)
-                    {
-                        <span>
-                            <i class="fas fa-dollar-sign"></i>
-                            @Model.Job.MinSalaryRange - @Model.Job.MaxSalaryRange
+                <div class="company-logo">
+                    <i class="fas fa-building"></i>
+                </div>
+                <div class="header-content">
+                    <div class="company-badge">@Model.Job.CompanyName</div>
+                    <h1 class="job-title">@Model.Job.Title</h1>
+                    <div class="header-tags">
+                        <span class="tag tag-location">
+                            <i class="fas fa-map-marker-alt"></i> @Model.Job.Location
                         </span>
-                    }
+                        <span class="tag tag-type">
+                            <i class="fas fa-briefcase"></i> @Model.Job.EmploymentType
+                        </span>
+                        <span class="tag tag-industry">
+                            <i class="fas fa-industry"></i> @Model.Job.Industry
+                        </span>
+                    </div>
                 </div>
             </div>
 
-            <div class="job-details-section">
-                <h2>Job Description</h2>
-                <p>@Model.Job.Description</p>
+            <!-- Quick Info Cards -->
+            <div class="quick-info-section">
+                <div class="info-card info-card-salary">
+                    <div class="info-icon">
+                        <i class="fas fa-dollar-sign"></i>
+                    </div>
+                    <div class="info-content">
+                        <span class="info-label">Salary Range</span>
+                        @if (Model.Job.MinSalaryRange.HasValue && Model.Job.MaxSalaryRange.HasValue)
+                        {
+                            <span class="info-value">$@Model.Job.MinSalaryRange - $@Model.Job.MaxSalaryRange</span>
+                        }
+                        else
+                        {
+                            <span class="info-value">Competitive</span>
+                        }
+                    </div>
+                </div>
+                <div class="info-card">
+                    <div class="info-icon">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                    <div class="info-content">
+                        <span class="info-label">Posted</span>
+                        <span class="info-value">@Model.Job.CreatedAt.ToString("MMM dd, yyyy")</span>
+                    </div>
+                </div>
+                <div class="info-card">
+                    <div class="info-icon">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <div class="info-content">
+                        <span class="info-label">Applicants</span>
+                        <span class="info-value">Be the first!</span>
+                    </div>
+                </div>
             </div>
 
-            <div class="job-details-section">
-                <h2>Requirements</h2>
-                <p>
-                    @(string.IsNullOrWhiteSpace(Model.Job.Requirements)
-                                        ? "No specific requirements listed."
-                                        : Model.Job.Requirements)
-                </p>
-            </div>
-            <div class="job-details-actions">
-                <form method="get" asp-page="/JobSeeker/ResumeTest">
-                    <input type="hidden" name="id" value="@Model.Job.Id" />
-                    <button type="submit" class="btn btn-primary">Test Resume</button>
-                </form>
+            <!-- Main Content -->
+            <div class="content-grid">
+                <!-- Left Column -->
+                <div class="main-column">
+                    <!-- Job Description -->
+                    <div class="content-section">
+                        <div class="section-title">
+                            <div class="title-icon">
+                                <i class="fas fa-file-alt"></i>
+                            </div>
+                            <h2>About the Role</h2>
+                        </div>
+                        <div class="section-body">
+                            <p class="description-text">@Model.Job.Description</p>
+                        </div>
+                    </div>
 
-            </div>
+                    <!-- Requirements -->
+                    <div class="content-section">
+                        <div class="section-title">
+                            <div class="title-icon">
+                                <i class="fas fa-check-circle"></i>
+                            </div>
+                            <h2>Requirements</h2>
+                        </div>
+                        <div class="section-body">
+                            @if (!string.IsNullOrWhiteSpace(Model.Job.Requirements))
+                            {
+                                <p class="description-text">@Model.Job.Requirements</p>
+                            }
+                            else
+                            {
+                                <p class="no-requirements">No specific requirements listed for this position.</p>
+                            }
+                        </div>
+                    </div>
+                </div>
 
+                <!-- Right Column - Sticky Sidebar -->
+                <div class="sidebar-column">
+                    <div class="apply-card">
+                        <div class="apply-card-header">
+                            <i class="fas fa-rocket"></i>
+                            <h3>Ready to Apply?</h3>
+                        </div>
+                        <p class="apply-card-text">Test your resume compatibility with this position using our AI-powered analyzer.</p>
+                        <form method="get" asp-page="/JobSeeker/ResumeTest">
+                            <input type="hidden" name="id" value="@Model.Job.Id" />
+                            <button type="submit" class="apply-button">
+                                <i class="fas fa-file-alt"></i>
+                                <span>Test Resume</span>
+                                <i class="fas fa-arrow-right"></i>
+                            </button>
+                        </form>
+
+                        <div class="apply-benefits">
+                            <div class="benefit-item">
+                                <i class="fas fa-check"></i>
+                                <span>Instant compatibility score</span>
+                            </div>
+                            <div class="benefit-item">
+                                <i class="fas fa-check"></i>
+                                <span>Personalized feedback</span>
+                            </div>
+                            <div class="benefit-item">
+                                <i class="fas fa-check"></i>
+                                <span>Increase your chances</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Company Info -->
+                    <div class="company-card">
+                        <h4>About the Company</h4>
+                        <div class="company-info-item">
+                            <i class="fas fa-building"></i>
+                            <span>@Model.Job.CompanyName</span>
+                        </div>
+                        <div class="company-info-item">
+                            <i class="fas fa-industry"></i>
+                            <span>@Model.Job.Industry</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </div>
 
-<style>
-    /* Job Details */
-    .job-details-content {
-        background-color: var(--card-background);
-        border-radius: var(--border-radius);
-        padding: 2rem;
-        box-shadow: var(--shadow);
-    }
-
-    .job-details-header {
-        border-bottom: 1px solid var(--border-color);
-        padding-bottom: 2rem;
-        margin-bottom: 2rem;
-    }
-
-        .job-details-header h1 {
-            font-size: 2rem;
-            margin-bottom: 0.5rem;
+@section Styles {
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1e40af;
+            --primary-light: #dbeafe;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --text-dark: #0f172a;
+            --text-medium: #475569;
+            --text-light: #94a3b8;
+            --border: #e2e8f0;
+            --bg-light: #f8fafc;
+            --white: #ffffff;
+            --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.1);
+            --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.07);
+            --shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.1);
+            --shadow-xl: 0 20px 40px rgba(0, 0, 0, 0.1);
+            --radius: 16px;
+            --radius-lg: 20px;
         }
 
-    .job-details-company {
-        color: var(--primary-color);
-        font-size: 1.2rem;
-        font-weight: 600;
-        margin-bottom: 1rem;
-    }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-    .job-details-meta {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 1.5rem;
-        color: var(--text-secondary);
-    }
+        #job-details-page {
+            background: linear-gradient(135deg, #f8fafc 0%, #e0e7ff 100%);
+            min-height: 100vh;
+            padding: 2rem 0 4rem;
+        }
 
-    .job-details-section {
-        margin-bottom: 2rem;
-    }
+        .job-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 1.5rem;
+        }
 
-        .job-details-section h2 {
+        /* Back Button */
+        .back-button {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--text-medium);
+            font-weight: 500;
+            text-decoration: none;
+            margin-bottom: 1.5rem;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            transition: all 0.2s;
+        }
+
+            .back-button:hover {
+                color: var(--primary);
+                background: var(--white);
+                transform: translateX(-4px);
+            }
+
+        /* Main Content Card */
+        .job-details-content {
+            background: var(--white);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-xl);
+            overflow: hidden;
+            animation: fadeInUp 0.6s ease;
+        }
+
+        /* Header Section */
+        .job-details-header {
+            background: linear-gradient(135deg, var(--primary) 0%, #3b82f6 100%);
+            padding: 3rem 2.5rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+            .job-details-header::before {
+                content: '';
+                position: absolute;
+                top: -50%;
+                right: -10%;
+                width: 400px;
+                height: 400px;
+                background: rgba(255, 255, 255, 0.1);
+                border-radius: 50%;
+            }
+
+        .company-logo {
+            width: 80px;
+            height: 80px;
+            background: var(--white);
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1.5rem;
+            box-shadow: var(--shadow-lg);
+        }
+
+            .company-logo i {
+                font-size: 2rem;
+                color: var(--primary);
+            }
+
+        .company-badge {
+            display: inline-block;
+            background: rgba(255, 255, 255, 0.2);
+            color: var(--white);
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.875rem;
+            font-weight: 600;
             margin-bottom: 1rem;
-            color: var(--text-primary);
+            backdrop-filter: blur(10px);
         }
 
-        .job-details-section p {
-            line-height: 1.7;
-            color: var(--text-secondary);
+        .job-title {
+            color: var(--white);
+            font-size: 2.5rem;
+            font-weight: 800;
+            margin-bottom: 1.5rem;
+            line-height: 1.2;
         }
-</style>
+
+        .header-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+        }
+
+        .tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: rgba(255, 255, 255, 0.15);
+            color: var(--white);
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            backdrop-filter: blur(10px);
+        }
+
+        /* Quick Info Section */
+        .quick-info-section {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            padding: 2rem 2.5rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .info-card {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1.25rem;
+            background: var(--bg-light);
+            border-radius: var(--radius);
+            transition: all 0.3s;
+        }
+
+            .info-card:hover {
+                transform: translateY(-4px);
+                box-shadow: var(--shadow-md);
+            }
+
+        .info-card-salary {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        }
+
+            .info-card-salary .info-icon {
+                background: rgba(255, 255, 255, 0.2);
+                color: var(--white);
+            }
+
+            .info-card-salary .info-label,
+            .info-card-salary .info-value {
+                color: var(--white);
+            }
+
+        .info-icon {
+            width: 48px;
+            height: 48px;
+            background: var(--white);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+            color: var(--primary);
+            flex-shrink: 0;
+        }
+
+        .info-content {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+
+        .info-label {
+            font-size: 0.75rem;
+            color: var(--text-light);
+            text-transform: uppercase;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+        }
+
+        .info-value {
+            font-size: 1rem;
+            color: var(--text-dark);
+            font-weight: 700;
+        }
+
+        /* Content Grid */
+        .content-grid {
+            display: grid;
+            grid-template-columns: 1fr 380px;
+            gap: 2rem;
+            padding: 2.5rem;
+        }
+
+        /* Content Sections */
+        .content-section {
+            margin-bottom: 2.5rem;
+        }
+
+        .section-title {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .title-icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, var(--primary-light) 0%, #e0e7ff 100%);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--primary);
+            font-size: 1.125rem;
+        }
+
+        .section-title h2 {
+            font-size: 1.5rem;
+            color: var(--text-dark);
+            font-weight: 700;
+        }
+
+        .section-body {
+            padding-left: 3.5rem;
+        }
+
+        .description-text {
+            color: var(--text-medium);
+            line-height: 1.8;
+            font-size: 1rem;
+            white-space: pre-wrap;
+        }
+
+        .no-requirements {
+            color: var(--text-light);
+            font-style: italic;
+        }
+
+        /* Sidebar */
+        .sidebar-column {
+            position: sticky;
+            top: 2rem;
+            height: fit-content;
+        }
+
+        .apply-card {
+            background: linear-gradient(135deg, var(--primary) 0%, #3b82f6 100%);
+            border-radius: var(--radius);
+            padding: 2rem;
+            margin-bottom: 1.5rem;
+            box-shadow: var(--shadow-lg);
+        }
+
+        .apply-card-header {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 1rem;
+            color: var(--white);
+        }
+
+            .apply-card-header i {
+                font-size: 1.5rem;
+            }
+
+            .apply-card-header h3 {
+                font-size: 1.375rem;
+                font-weight: 700;
+            }
+
+        .apply-card-text {
+            color: rgba(255, 255, 255, 0.9);
+            line-height: 1.6;
+            margin-bottom: 1.5rem;
+        }
+
+        .apply-button {
+            width: 100%;
+            background: var(--white);
+            color: var(--primary);
+            border: none;
+            border-radius: 12px;
+            padding: 1rem 1.5rem;
+            font-size: 1.125rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+            .apply-button:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+            }
+
+            .apply-button:active {
+                transform: translateY(0);
+            }
+
+        .apply-benefits {
+            margin-top: 1.5rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .benefit-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            color: var(--white);
+            margin-bottom: 0.75rem;
+            font-size: 0.875rem;
+        }
+
+            .benefit-item i {
+                color: #10b981;
+                background: var(--white);
+                width: 20px;
+                height: 20px;
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 0.625rem;
+            }
+
+        /* Company Card */
+        .company-card {
+            background: var(--bg-light);
+            border-radius: var(--radius);
+            padding: 1.5rem;
+        }
+
+            .company-card h4 {
+                font-size: 1.125rem;
+                color: var(--text-dark);
+                margin-bottom: 1rem;
+                font-weight: 700;
+            }
+
+        .company-info-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            color: var(--text-medium);
+            margin-bottom: 0.75rem;
+            font-size: 0.9375rem;
+        }
+
+            .company-info-item i {
+                color: var(--primary);
+                width: 20px;
+                text-align: center;
+            }
+
+        /* Animations */
+        keyframes fadeInUp {
+            from
+
+        {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        }
+
+        /* Responsive */
+        media (max-width: 1024px) {
+            .content-grid
+
+        {
+            grid-template-columns: 1fr;
+        }
+
+        .sidebar-column {
+            position: static;
+        }
+
+        }
+
+        media (max-width: 768px) {
+            .job-title
+
+        {
+            font-size: 1.75rem;
+        }
+
+        .quick-info-section {
+            grid-template-columns: 1fr;
+            padding: 1.5rem;
+        }
+
+        .content-grid {
+            padding: 1.5rem;
+        }
+
+        .section-body {
+            padding-left: 0;
+        }
+
+        .job-details-header {
+            padding: 2rem 1.5rem;
+        }
+
+        }
+    </style>
+}
