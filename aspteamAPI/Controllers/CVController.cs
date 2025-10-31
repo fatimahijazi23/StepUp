@@ -1,204 +1,118 @@
-﻿@page
-@model LoginModel
-@{
-    ViewData["Title"] = "Login";
-    Layout = null;
-}
+﻿using aspteamAPI.context;
+using aspteamAPI.DTOs;
+using aspteamAPI.Repositories;
+using Microsoft.AspNetCore.Mvc;
+using System.Net.Http.Headers;
+using Newtonsoft.Json;
+using aspteamAPI.Migrations;
+using UglyToad.PdfPig;
 
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+namespace aspteamAPI.Controllers
+{
+    [ApiController]
+    [Route("api/[controller]")]
+    public class CvController : ControllerBase
+    {
+        private readonly ICvRepository _cvRepository;
 
-<style>
-    body {
-        background: linear-gradient(to right, #007bff, #00c6ff);
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    }
-
-    .login-container {
-        max-width: 400px;
-        margin: 100px auto;
-        background: #fff;
-        padding: 35px;
-        border-radius: 15px;
-        box-shadow: 0px 8px 25px rgba(0, 0, 0, 0.2);
-        animation: fadeInUp 1s ease-in-out;
-    }
-
-        .login-container h2 {
-            font-weight: bold;
-            text-align: center;
-            margin-bottom: 25px;
-            color: #007bff;
-        }
-
-    .btn-custom {
-        background: #007bff;
-        border: none;
-        width: 100%;
-        padding: 12px;
-        font-size: 16px;
-        border-radius: 8px;
-        transition: all 0.3s ease-in-out;
-    }
-
-        .btn-custom:hover {
-            background: #0056b3;
-            transform: scale(1.05);
-        }
-
-    .form-control {
-        border-radius: 8px;
-        padding: 12px;
-    }
-
-    .extra-links {
-        text-align: center;
-        margin-top: 15px;
-        font-size: 14px;
-    }
-
-        .extra-links a {
-            color: #007bff;
-            text-decoration: none;
-            margin: 0 5px;
-        }
-
-            .extra-links a:hover {
-                text-decoration: underline;
-            }
-
-    /* Animations */
-    @@keyframes fadeInUp {
-        from {
-            opacity: 0;
-            transform: translateY(30px);
-        }
-
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
-    }
-</style>
-
-<div class="login-container">
-    <h2>Welcome Back</h2>
-    <form method="post">
-        <div class="mb-3">
-            <label class="form-label">Email</label>
-            <input asp-for="Email" type="email" class="form-control" required />
-        </div>
-        <div class="mb-3">
-            <label class="form-label">Password</label>
-            <input asp-for="Password" type="password" class="form-control" required />
-        </div>
-
-        @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+        public CvController(ICvRepository cvRepository)
         {
-            <div class="alert alert-danger">@Model.ErrorMessage</div>
+            _cvRepository = cvRepository;
         }
 
-        <button type="submit" class="btn btn-custom">Login</button>
-    </form>
-</div>
-@page
-@model LoginModel
-@{
-    ViewData["Title"] = "Login";
-    Layout = null;
-}
-
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-
-<style>
-    body {
-        background: linear-gradient(to right, #007bff, #00c6ff);
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    }
-
-    .login-container {
-        max-width: 400px;
-        margin: 100px auto;
-        background: #fff;
-        padding: 35px;
-        border-radius: 15px;
-        box-shadow: 0px 8px 25px rgba(0, 0, 0, 0.2);
-        animation: fadeInUp 1s ease-in-out;
-    }
-
-        .login-container h2 {
-            font-weight: bold;
-            text-align: center;
-            margin-bottom: 25px;
-            color: #007bff;
-        }
-
-    .btn-custom {
-        background: #007bff;
-        border: none;
-        width: 100%;
-        padding: 12px;
-        font-size: 16px;
-        border-radius: 8px;
-        transition: all 0.3s ease-in-out;
-    }
-
-        .btn-custom:hover {
-            background: #0056b3;
-            transform: scale(1.05);
-        }
-
-    .form-control {
-        border-radius: 8px;
-        padding: 12px;
-    }
-
-    .extra-links {
-        text-align: center;
-        margin-top: 15px;
-        font-size: 14px;
-    }
-
-        .extra-links a {
-            color: #007bff;
-            text-decoration: none;
-            margin: 0 5px;
-        }
-
-            .extra-links a:hover {
-                text-decoration: underline;
-            }
-
-    /* Animations */
-    @@keyframes fadeInUp {
-        from {
-            opacity: 0;
-            transform: translateY(30px);
-        }
-
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
-    }
-</style>
-
-<div class="login-container">
-    <h2>Welcome Back</h2>
-    <form method="post">
-        <div class="mb-3">
-            <label class="form-label">Email</label>
-            <input asp-for="Email" type="email" class="form-control" required />
-        </div>
-        <div class="mb-3">
-            <label class="form-label">Password</label>
-            <input asp-for="Password" type="password" class="form-control" required />
-        </div>
-
-        @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+        // Existing method for analyzing by CV ID
+        [HttpPost("analyze")]
+        public async Task<IActionResult> AnalyzeCv([FromForm] int cvId, [FromForm] string jobDescription)
         {
-            <div class="alert alert-danger">@Model.ErrorMessage</div>
+            var cv = await _cvRepository.GetCvByIdAsync(cvId);
+            if (cv == null)
+                return NotFound($"CV with ID = {cvId} not found");
+
+            var filePath = Path.Combine("wwwroot/files", cv.FileUrl);
+            if (!System.IO.File.Exists(filePath))
+                return NotFound($"CV file '{cv.FileUrl}' not found on server");
+
+            using var client = new HttpClient();
+            using var form = new MultipartFormDataContent();
+            using var fileStream = System.IO.File.OpenRead(filePath);
+
+            var fileContent = new StreamContent(fileStream);
+            fileContent.Headers.ContentType = MediaTypeHeaderValue.Parse("application/pdf");
+            form.Add(fileContent, "cvFile", cv.FileUrl);
+            form.Add(new StringContent(jobDescription), "jobDescription");
+
+            var n8nWebhookUrl = "https://n8nfatima.ddns.net/webhook/resume-evaluator";
+            var response = await client.PostAsync(n8nWebhookUrl, form);
+
+            if (!response.IsSuccessStatusCode)
+                return StatusCode((int)response.StatusCode, "Failed to process CV through n8n");
+
+            var analysisJson = await response.Content.ReadAsStringAsync();
+            return Ok(new { cvId = cv.Id, analysis = analysisJson });
         }
 
-        <button type="submit" class="btn btn-custom">Login</button>
-    </form>
-</div>
+        // NEW method for analyzing uploaded file directly
+        [HttpPost("analyze-upload")]
+        public async Task<IActionResult> AnalyzeUploadedCv([FromForm] IFormFile cvFile, [FromForm] string jobDescription)
+        {
+            if (cvFile == null || cvFile.Length == 0)
+                return BadRequest("No file uploaded");
+
+            if (string.IsNullOrWhiteSpace(jobDescription))
+                return BadRequest("Job description is required");
+
+            try
+            {
+                using var client = new HttpClient();
+                using var form = new MultipartFormDataContent();
+
+                // Read file content
+                using var fileStream = cvFile.OpenReadStream();
+                var fileContent = new StreamContent(fileStream);
+
+                // Set content type based on file extension
+                var contentType = cvFile.ContentType;
+                if (string.IsNullOrEmpty(contentType))
+                {
+                    contentType = cvFile.FileName.EndsWith(".pdf", StringComparison.OrdinalIgnoreCase)
+                        ? "application/pdf"
+                        : "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
+                }
+
+                fileContent.Headers.ContentType = MediaTypeHeaderValue.Parse(contentType);
+                form.Add(fileContent, "cvFile", cvFile.FileName);
+                form.Add(new StringContent(jobDescription), "jobDescription");
+
+                // Send to n8n webhook
+                var n8nWebhookUrl = "https://n8nfatima.ddns.net/webhook/resume-evaluator";
+                var response = await client.PostAsync(n8nWebhookUrl, form);
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    var errorContent = await response.Content.ReadAsStringAsync();
+                    return StatusCode((int)response.StatusCode,
+                        new { message = "Failed to process CV through n8n", details = errorContent });
+                }
+
+                var analysisJson = await response.Content.ReadAsStringAsync();
+
+                // Try to parse
+
+                try
+                {
+                    var analysisResult = JsonConvert.DeserializeObject<dynamic>(analysisJson);
+                    return Ok(new { success = true, analysis = analysisResult });
+                }
+                catch
+                {
+                    // If parsing fails, return raw JSON
+                    return Ok(new { success = true, analysis = analysisJson });
+                }
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Error processing CV", error = ex.Message });
+            }
+        }
+    }
+}

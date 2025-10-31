@@ -14,7 +14,7 @@ namespace aspteamWeb.Pages.Company
         private readonly IWebHostEnvironment _environment;
         private readonly string connectionString = "Server=DESKTOP-81J6GVU\\SQLEXPRESS;Database=SetUp;Trusted_Connection=True;MultipleActiveResultSets=true;TrustServerCertificate=True";
 
-        public ProfileCompanyModel(HttpClient httpClient, IWebHostEnvironment environment)
+        public ProfileModel(HttpClient httpClient, IWebHostEnvironment environment)
         {
             _httpClient = httpClient;
             _environment = environment;

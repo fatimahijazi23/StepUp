@@ -20,7 +20,7 @@ namespace aspteamWeb.Pages.Company
 
         public string ErrorMessage { get; set; }
 
-        private readonly string connectionString = "Server=LAPTOP-8MT5CR5T\\SQLSERVER;Database=SetUp;Trusted_Connection=True;MultipleActiveResultSets=true;TrustServerCertificate=True";
+        private readonly string connectionString = "Server=DESKTOP-81J6GVU\\SQLEXPRESS;Database=SetUp;Trusted_Connection=True;MultipleActiveResultSets=true;TrustServerCertificate=True";
 
         public void OnGet()
         {
