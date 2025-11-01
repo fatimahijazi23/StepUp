@@ -2,7 +2,7 @@
 @model aspteamWeb.Pages.Company.JobDetailsModel
 @{
     ViewData["Title"] = Model.Job?.JobTitle ?? "Job Details";
-    Layout = null;
+    Layout = "/Pages/Shared/_JobSeekerLayout.cshtml";
 }
 
 <div class="container mt-4">
